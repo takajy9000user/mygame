@@ -67,6 +67,11 @@ class ShooterScene extends Phaser.Scene {
     this.gameStarted = false;
     this.lastFiredAt = 0;
     this.selectedEnemyIndex = 0;
+    this.touchTarget = null;
+    this.touchShooting = false;
+    this.isTouchDevice =
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(hover: none)").matches;
     this.enemyOptions = this.buildEnemyOptions();
 
     this.add.rectangle(
@@ -115,7 +120,9 @@ class ShooterScene extends Phaser.Scene {
     this.guideText = this.add.text(
       GAME_WIDTH / 2,
       GAME_HEIGHT - 24,
-      "MOVE: Arrow Keys / FIRE: Space",
+      this.isTouchDevice
+        ? "SWIPE: MOVE / TAP: FIRE"
+        : "MOVE: Arrow Keys / FIRE: Space",
       {
         fontFamily: "monospace",
         fontSize: "14px",
@@ -147,7 +154,9 @@ class ShooterScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT - 80,
-        "LEFT / RIGHT: SELECT   ENTER: START",
+        this.isTouchDevice
+          ? "TAP LEFT/RIGHT: SELECT   TAP CENTER: START"
+          : "LEFT / RIGHT: SELECT   ENTER: START",
         {
           fontFamily: "monospace",
           fontSize: "16px",
@@ -243,6 +252,45 @@ class ShooterScene extends Phaser.Scene {
       }
     });
 
+    this.input.on("pointerdown", (pointer) => {
+      if (!this.isPointerInsideGame(pointer)) {
+        return;
+      }
+
+      if (this.gameOver) {
+        this.scene.restart();
+        return;
+      }
+
+      if (!this.gameStarted) {
+        this.handleStartScreenPointer(pointer);
+        return;
+      }
+
+      this.touchTarget = {
+        x: Phaser.Math.Clamp(pointer.x, 24, GAME_WIDTH - 24),
+        y: Phaser.Math.Clamp(pointer.y, 40, GAME_HEIGHT - 40)
+      };
+      this.touchShooting = true;
+      this.fireBullet(this.time.now);
+    });
+
+    this.input.on("pointermove", (pointer) => {
+      if (!pointer.isDown || !this.gameStarted || !this.isPointerInsideGame(pointer)) {
+        return;
+      }
+
+      this.touchTarget = {
+        x: Phaser.Math.Clamp(pointer.x, 24, GAME_WIDTH - 24),
+        y: Phaser.Math.Clamp(pointer.y, 40, GAME_HEIGHT - 40)
+      };
+    });
+
+    this.input.on("pointerup", () => {
+      this.touchShooting = false;
+      this.touchTarget = null;
+    });
+
     this.refreshEnemySelection();
     updateStatusMessage(
       getCustomEnemyStatus() || "公開URLかローカル画像ファイルを使えます"
@@ -265,10 +313,21 @@ class ShooterScene extends Phaser.Scene {
     const horizontal = (moveRight ? 1 : 0) - (moveLeft ? 1 : 0);
     const vertical = (moveDown ? 1 : 0) - (moveUp ? 1 : 0);
 
-    this.player.setVelocity(horizontal * PLAYER_SPEED, vertical * PLAYER_SPEED);
+    if (this.touchTarget) {
+      const dx = this.touchTarget.x - this.player.x;
+      const dy = this.touchTarget.y - this.player.y;
+
+      this.player.setVelocity(
+        Phaser.Math.Clamp(dx * 8, -PLAYER_SPEED, PLAYER_SPEED),
+        Phaser.Math.Clamp(dy * 8, -PLAYER_SPEED, PLAYER_SPEED)
+      );
+    } else {
+      this.player.setVelocity(horizontal * PLAYER_SPEED, vertical * PLAYER_SPEED);
+    }
 
     if (
       Phaser.Input.Keyboard.JustDown(this.fireKey) ||
+      (this.touchShooting && time > this.lastFiredAt + FIRE_INTERVAL) ||
       (this.fireKey.isDown && time > this.lastFiredAt + FIRE_INTERVAL)
     ) {
       this.fireBullet(time);
@@ -435,6 +494,7 @@ class ShooterScene extends Phaser.Scene {
     this.gameStarted = true;
     this.player.setVisible(true);
     this.player.body.enable = true;
+    this.player.clearTint();
     this.enemyTimer.paused = false;
     this.startTitleText.setVisible(false);
     this.startHintText.setVisible(false);
@@ -443,7 +503,9 @@ class ShooterScene extends Phaser.Scene {
     this.enemyFlavorText.setVisible(false);
     this.selectionMarkers.forEach((marker) => marker.setVisible(false));
     this.guideText.setText(
-      `ENEMY: ${this.enemyOptions[this.selectedEnemyIndex].name} / FIRE: Space`
+      this.isTouchDevice
+        ? `ENEMY: ${this.enemyOptions[this.selectedEnemyIndex].name} / SWIPE + TAP`
+        : `ENEMY: ${this.enemyOptions[this.selectedEnemyIndex].name} / FIRE: Space`
     );
   }
 
@@ -464,6 +526,29 @@ class ShooterScene extends Phaser.Scene {
   recycleGameObject(gameObject) {
     gameObject.disableBody(true, true);
     gameObject.setVelocity(0, 0);
+  }
+
+  handleStartScreenPointer(pointer) {
+    if (pointer.x < GAME_WIDTH * 0.34) {
+      this.changeEnemySelection(-1);
+      return;
+    }
+
+    if (pointer.x > GAME_WIDTH * 0.66) {
+      this.changeEnemySelection(1);
+      return;
+    }
+
+    this.startGame();
+  }
+
+  isPointerInsideGame(pointer) {
+    return (
+      pointer.x >= 0 &&
+      pointer.x <= GAME_WIDTH &&
+      pointer.y >= 0 &&
+      pointer.y <= GAME_HEIGHT
+    );
   }
 }
 
