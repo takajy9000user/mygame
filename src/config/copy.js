@@ -12,7 +12,7 @@ export const UI_COPY = {
     "2. したの 3つの すうじから こたえを えらぼう",
     "3. せいかいを うって てきを たおそう"
   ],
-  controlsDesktop: "そうさ: ← → いどう / 1 2 3 か スペースで うつ",
+  controlsDesktop: "そうさ: ひだり みぎ で いどう / 1 2 3 か スペースで うつ",
   controlsMobile: "そうさ: ドラッグで いどう / したの すうじを タップ",
   question: "もんだい",
   stageClear: "ステージ クリア",

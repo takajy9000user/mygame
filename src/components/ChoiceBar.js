@@ -5,6 +5,7 @@ function createChoiceButton(scene, x, y) {
   const container = scene.add.container(x, y);
   const plate = scene.add.rectangle(0, 0, 120, 76, 0xffffff);
   plate.setStrokeStyle(4, 0x18355d);
+  plate.setInteractive({ useHandCursor: true });
 
   const label = scene.add.text(0, -4, "", {
     fontFamily: "Arial Black, sans-serif",
@@ -12,6 +13,7 @@ function createChoiceButton(scene, x, y) {
     color: "#17365b"
   });
   label.setOrigin(0.5);
+  label.setInteractive({ useHandCursor: true });
 
   const hint = scene.add.text(0, 24, "", {
     fontFamily: "Arial, sans-serif",
@@ -19,13 +21,10 @@ function createChoiceButton(scene, x, y) {
     color: "#35506f"
   });
   hint.setOrigin(0.5);
+  hint.setInteractive({ useHandCursor: true });
 
   container.add([plate, label, hint]);
   container.setSize(120, 76);
-  container.setInteractive(
-    new Phaser.Geom.Rectangle(-60, -38, 120, 76),
-    Phaser.Geom.Rectangle.Contains
-  );
 
   return { container, plate, label, hint };
 }
@@ -41,9 +40,12 @@ export class ChoiceBar extends Phaser.GameObjects.Container {
 
     positions.forEach((offsetX, index) => {
       const button = createChoiceButton(scene, offsetX, 0);
-      button.container.on("pointerdown", () => {
+      const handlePress = () => {
         this.fireChoice(index);
-      });
+      };
+      button.plate.on("pointerdown", handlePress);
+      button.label.on("pointerdown", handlePress);
+      button.hint.on("pointerdown", handlePress);
       this.buttons.push(button);
       this.add(button.container);
     });
