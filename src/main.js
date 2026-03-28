@@ -8,6 +8,23 @@ const BULLET_SPEED = 520;
 const ENEMY_SPEED_MIN = 120;
 const ENEMY_SPEED_MAX = 240;
 const FIRE_INTERVAL = 180;
+const ENEMY_OPTIONS = [
+  {
+    key: "enemy-crab",
+    name: "CRAB",
+    accent: "#ff5d73"
+  },
+  {
+    key: "enemy-skull",
+    name: "SKULL",
+    accent: "#9bff66"
+  },
+  {
+    key: "enemy-ufo",
+    name: "UFO",
+    accent: "#66d9ff"
+  }
+];
 
 class ShooterScene extends Phaser.Scene {
   constructor() {
@@ -21,7 +38,9 @@ class ShooterScene extends Phaser.Scene {
   create() {
     this.score = 0;
     this.gameOver = false;
+    this.gameStarted = false;
     this.lastFiredAt = 0;
+    this.selectedEnemyIndex = 0;
 
     this.add.rectangle(
       GAME_WIDTH / 2,
@@ -41,7 +60,9 @@ class ShooterScene extends Phaser.Scene {
 
     this.player = this.physics.add
       .image(GAME_WIDTH / 2, GAME_HEIGHT - 80, "player")
-      .setCollideWorldBounds(true);
+      .setCollideWorldBounds(true)
+      .setVisible(false);
+    this.player.body.enable = false;
 
     this.bullets = this.physics.add.group({
       classType: Phaser.Physics.Arcade.Image,
@@ -86,6 +107,72 @@ class ShooterScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(10);
 
+    this.startTitleText = this.add
+      .text(GAME_WIDTH / 2, 120, "CHOOSE YOUR ENEMY", {
+        fontFamily: "monospace",
+        fontSize: "28px",
+        color: "#ffffff"
+      })
+      .setOrigin(0.5)
+      .setDepth(10);
+
+    this.startHintText = this.add
+      .text(
+        GAME_WIDTH / 2,
+        GAME_HEIGHT - 80,
+        "LEFT / RIGHT: SELECT   ENTER: START",
+        {
+          fontFamily: "monospace",
+          fontSize: "16px",
+          color: "#9fb3c8"
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(10);
+
+    this.enemyPreview = this.add
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, ENEMY_OPTIONS[0].key)
+      .setScale(4)
+      .setDepth(10);
+
+    this.enemyNameText = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 110, "", {
+        fontFamily: "monospace",
+        fontSize: "24px",
+        color: "#ffffff"
+      })
+      .setOrigin(0.5)
+      .setDepth(10);
+
+    this.enemyFlavorText = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 152, "", {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        align: "center",
+        color: "#c9d7e6"
+      })
+      .setOrigin(0.5)
+      .setDepth(10);
+
+    this.selectionMarkers = [
+      this.add
+        .text(GAME_WIDTH / 2 - 140, GAME_HEIGHT / 2 - 10, "<", {
+          fontFamily: "monospace",
+          fontSize: "44px",
+          color: "#ffffff"
+        })
+        .setOrigin(0.5)
+        .setDepth(10),
+      this.add
+        .text(GAME_WIDTH / 2 + 140, GAME_HEIGHT / 2 - 10, ">", {
+          fontFamily: "monospace",
+          fontSize: "44px",
+          color: "#ffffff"
+        })
+        .setOrigin(0.5)
+        .setDepth(10)
+    ];
+
     this.physics.add.overlap(
       this.bullets,
       this.enemies,
@@ -107,18 +194,35 @@ class ShooterScene extends Phaser.Scene {
       callback: this.spawnEnemy,
       callbackScope: this
     });
+    this.enemyTimer.paused = true;
 
     this.input.keyboard.on("keydown-ENTER", () => {
       if (this.gameOver) {
         this.scene.restart();
+      } else if (!this.gameStarted) {
+        this.startGame();
       }
     });
+
+    this.input.keyboard.on("keydown-LEFT", () => {
+      if (!this.gameStarted) {
+        this.changeEnemySelection(-1);
+      }
+    });
+
+    this.input.keyboard.on("keydown-RIGHT", () => {
+      if (!this.gameStarted) {
+        this.changeEnemySelection(1);
+      }
+    });
+
+    this.refreshEnemySelection();
   }
 
   update(time, delta) {
     this.updateStarfield(delta);
 
-    if (this.gameOver) {
+    if (this.gameOver || !this.gameStarted) {
       this.player.setVelocity(0);
       return;
     }
@@ -179,7 +283,23 @@ class ShooterScene extends Phaser.Scene {
     graphics.fillStyle(0xffffff, 1);
     graphics.fillRect(6, 8, 6, 6);
     graphics.fillRect(18, 8, 6, 6);
-    graphics.generateTexture("enemy", 30, 24);
+    graphics.generateTexture("enemy-crab", 30, 24);
+    graphics.clear();
+
+    graphics.fillStyle(0x9bff66, 1);
+    graphics.fillRoundedRect(6, 0, 28, 28, 8);
+    graphics.fillStyle(0x12202c, 1);
+    graphics.fillCircle(15, 12, 3);
+    graphics.fillCircle(25, 12, 3);
+    graphics.fillRect(14, 20, 12, 3);
+    graphics.generateTexture("enemy-skull", 40, 30);
+    graphics.clear();
+
+    graphics.fillStyle(0x66d9ff, 1);
+    graphics.fillEllipse(20, 16, 40, 18);
+    graphics.fillStyle(0xe7fbff, 1);
+    graphics.fillEllipse(20, 10, 18, 10);
+    graphics.generateTexture("enemy-ufo", 40, 30);
     graphics.destroy();
   }
 
@@ -221,20 +341,21 @@ class ShooterScene extends Phaser.Scene {
   }
 
   spawnEnemy() {
-    if (this.gameOver) {
+    if (this.gameOver || !this.gameStarted) {
       return;
     }
 
     const enemy = this.enemies.get(
       Phaser.Math.Between(28, GAME_WIDTH - 28),
       -32,
-      "enemy"
+      ENEMY_OPTIONS[this.selectedEnemyIndex].key
     );
 
     if (!enemy) {
       return;
     }
 
+    enemy.setTexture(ENEMY_OPTIONS[this.selectedEnemyIndex].key);
     enemy.setActive(true);
     enemy.setVisible(true);
     enemy.body.enable = true;
@@ -255,6 +376,44 @@ class ShooterScene extends Phaser.Scene {
     this.gameOver = true;
     this.enemyTimer.remove(false);
     this.resultText.setText("GAME OVER\nPRESS ENTER");
+  }
+
+  changeEnemySelection(direction) {
+    const total = ENEMY_OPTIONS.length;
+    this.selectedEnemyIndex =
+      (this.selectedEnemyIndex + direction + total) % total;
+    this.refreshEnemySelection();
+  }
+
+  refreshEnemySelection() {
+    const selected = ENEMY_OPTIONS[this.selectedEnemyIndex];
+    this.enemyPreview.setTexture(selected.key);
+    this.enemyNameText.setText(selected.name);
+    this.enemyNameText.setColor(selected.accent);
+
+    const flavorTextByEnemy = {
+      CRAB: "SIDE STEPPER\nCLASSIC RED INVADER",
+      SKULL: "BONE CHILLER\nGREEN PANIC WAVE",
+      UFO: "CITY POP RAIDER\nSMOOTH BLUE GLIDER"
+    };
+
+    this.enemyFlavorText.setText(flavorTextByEnemy[selected.name]);
+  }
+
+  startGame() {
+    this.gameStarted = true;
+    this.player.setVisible(true);
+    this.player.body.enable = true;
+    this.enemyTimer.paused = false;
+    this.startTitleText.setVisible(false);
+    this.startHintText.setVisible(false);
+    this.enemyPreview.setVisible(false);
+    this.enemyNameText.setVisible(false);
+    this.enemyFlavorText.setVisible(false);
+    this.selectionMarkers.forEach((marker) => marker.setVisible(false));
+    this.guideText.setText(
+      `ENEMY: ${ENEMY_OPTIONS[this.selectedEnemyIndex].name} / FIRE: Space`
+    );
   }
 
   recycleGameObject(gameObject) {
