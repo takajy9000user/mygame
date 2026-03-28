@@ -3,47 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini Shooter</title>
+    <title>さんすうシューティング</title>
     <meta
       name="description"
-      content="Phaser と Vite で作った最小構成の 2D シューティングゲーム"
+      content="小学4〜5年生向けの算数シューティングゲーム"
     />
   </head>
   <body>
-    <section class="control-panel">
-      <h1>Mini Shooter</h1>
-      <p class="panel-copy">
-        敵画像のURLを入れると、ゲーム開始前に選べるようになります。
-      </p>
-      <label class="panel-label" for="enemy-image-url">Enemy Image URL</label>
-      <input
-        id="enemy-image-url"
-        class="panel-input"
-        type="url"
-        placeholder="https://example.com/enemy.png"
-      />
-      <label class="panel-label" for="enemy-image-file">Or Local Image File</label>
-      <input
-        id="enemy-image-file"
-        class="panel-input panel-file"
-        type="file"
-        accept="image/png,image/jpeg,image/webp"
-      />
-      <div class="panel-actions">
-        <button id="save-enemy-image" class="panel-button" type="button">
-          Save URL
-        </button>
-        <button id="save-enemy-file" class="panel-button" type="button">
-          Save File
-        </button>
-        <button id="reset-enemy-image" class="panel-button ghost" type="button">
-          Reset
-        </button>
-      </div>
-      <p id="enemy-image-status" class="panel-status">
-        公開URLかローカル画像ファイルを使えます
-      </p>
-    </section>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>

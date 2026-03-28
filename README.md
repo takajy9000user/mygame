@@ -1,13 +1,26 @@
-# Mini Shooter
+# さんすうシューティング
 
-Phaser と Vite で作った最小構成の 2D ブラウザシューティングゲームです。
+Phaser + Vite で作った、小学4年生〜5年生向けのブラウザ算数シューティングです。  
+足し算・引き算・掛け算を、遊びながら反復できる MVP を実装しています。
 
-## セットアップ
+## できること
+
+- タイトル画面
+- 算数問題つきのシューティング本編
+- 3つの答え候補から選んで弾を撃つゲームループ
+- 正解・不正解・時間切れのフィードバック
+- ミスした問題タイプの再出題をしやすい設計
+- 結果画面での正答数、ミス数、正答率、苦手カテゴリ表示
+- 将来の `localStorage` 学習履歴保存やランキングAPI拡張を見据えた責務分離
+
+## 起動方法
 
 ```bash
 npm install
 npm run dev
 ```
+
+ブラウザで表示されたローカルURLを開くと遊べます。
 
 ## ビルド
 
@@ -15,37 +28,53 @@ npm run dev
 npm run build
 ```
 
-`dist/` が生成されるので、そのまま Cloudflare Pages の配信対象にできます。
-
-## Cloudflare Pages で公開
-
-1. GitHub にこのリポジトリを push
-2. Cloudflare Pages で `mygame` リポジトリを接続
-3. Build command を `npm run build`
-4. Build output directory を `dist`
-5. Node.js のバージョンは Cloudflare のデフォルトで問題ありません
+`dist/` が生成され、Cloudflare Pages にそのまま配置できます。
 
 ## 操作
 
-- 敵画像の差し替え: 画面左の URL 入力欄または画像ファイル選択
-- 開始前の敵選択: 左右キー
-- ゲーム開始: Enter
-- 移動: 矢印キー
-- 攻撃: スペースキー
-- リスタート: Enter
+### PC
 
-## Android 操作
+- 移動: `←` `→` または `A` `D`
+- 答えを撃つ: `1` `2` `3`
+- 選んだ答えで撃つ: `Space`
 
-- 開始前の敵選択: 画面の左側タップで前、右側タップで次
-- ゲーム開始: 画面中央をタップ
-- 移動: スワイプ
-- 攻撃: タップまたは押し続け
-- Android では画像設定パネルは非表示です
+### スマートフォン / タブレット
 
-## 敵画像を任意画像にする方法
+- 移動: 画面下以外をドラッグ
+- 答えを撃つ: 下の数字ボタンをタップ
 
-1. いちばん簡単なのは、画面左の `Local Image File` で画像を選んで `Save File`
-2. または、公開URLを `Enemy Image URL` に貼って `Save URL`
-3. 再読み込み後、開始前の敵選択に `CUSTOM` が追加されます
+## ディレクトリ構成
 
-ローカル画像ファイル保存ならアップロード先は不要です。URL利用時は CORS 制限のない公開画像URLを使ってください。
+```text
+src/
+  assets/
+  components/
+  config/
+  logic/
+    game/
+    questions/
+  scenes/
+  styles/
+  ui/
+```
+
+## Cloudflare Pages で公開
+
+Cloudflare Pages の設定は次で動きます。
+
+- Production branch: `main`
+- Build command: `npm run build`
+- Build output directory: `dist`
+
+## 注意点
+
+- このプロジェクトはフロントエンドのみで完結します
+- Node.js は Cloudflare Pages の標準環境で問題ありません
+- 将来的にランキングAPIを追加する場合は Cloudflare Workers を別途追加しやすい構成です
+
+## 今後の拡張候補
+
+- 割り算や文章題の追加
+- `localStorage` を使った苦手分野の継続保存
+- SE / BGM の実装
+- Cloudflare Workers によるランキング機能
