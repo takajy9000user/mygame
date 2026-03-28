@@ -1,0 +1,450 @@
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #f6f0de;
+  background:
+    radial-gradient(circle at top, rgba(255, 228, 163, 0.2), transparent 30%),
+    linear-gradient(180deg, #0f3d2e 0%, #0a241c 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --panel: rgba(7, 24, 19, 0.82);
+  --panel-soft: rgba(18, 61, 47, 0.72);
+  --line: rgba(245, 225, 181, 0.22);
+  --accent: #ffd166;
+  --accent-strong: #ffb703;
+  --text-soft: #d9d0bf;
+  --grass-a: #2b7a46;
+  --grass-b: #22663b;
+  --goal: #f8f5ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+button,
+kbd {
+  font: inherit;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.game-shell {
+  width: min(1180px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.hero-panel,
+.stadium-card,
+.history-card,
+.insight-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+}
+
+.hero-panel {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 28px 28px 18px 18px;
+}
+
+.eyebrow,
+.label {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  color: var(--accent);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.3rem, 5vw, 4.7rem);
+  line-height: 0.95;
+  max-width: 11ch;
+}
+
+.intro {
+  margin-top: 14px;
+  max-width: 58ch;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.score-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-self: end;
+}
+
+.score-card div,
+.control-box {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.score-card span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.score-card strong {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+
+.stadium-card {
+  margin-top: 18px;
+  padding: 24px;
+  border-radius: 18px 18px 28px 28px;
+}
+
+.stadium-head {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stadium-head h2 {
+  font-size: clamp(1.2rem, 2.2vw, 2rem);
+}
+
+.pitch {
+  position: relative;
+  min-height: 580px;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(183, 230, 255, 0.9) 0%, rgba(183, 230, 255, 0.32) 24%, transparent 25%),
+    repeating-linear-gradient(
+      90deg,
+      var(--grass-a) 0,
+      var(--grass-a) 80px,
+      var(--grass-b) 80px,
+      var(--grass-b) 160px
+    );
+}
+
+.pitch::before {
+  content: '';
+  position: absolute;
+  inset: 18% 12% 8%;
+  border: 3px solid rgba(255, 255, 255, 0.75);
+  border-radius: 0 0 26px 26px;
+}
+
+.goal {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  transform: translateX(-50%);
+  width: min(82%, 720px);
+  height: 260px;
+  border: 7px solid var(--goal);
+  border-bottom-width: 4px;
+  background: rgba(244, 247, 250, 0.08);
+}
+
+.goal::before,
+.goal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.06));
+}
+
+.goal::before {
+  left: -18px;
+  transform: skewY(30deg);
+}
+
+.goal::after {
+  right: -18px;
+  transform: skewY(-30deg);
+}
+
+.net-lines {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255, 255, 255, 0.36) 58px 60px),
+    repeating-linear-gradient(180deg, transparent 0 38px, rgba(255, 255, 255, 0.26) 38px 40px);
+  opacity: 0.65;
+}
+
+.zone-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+  padding: 14px;
+}
+
+.zone-button {
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(12, 35, 28, 0.18);
+  color: rgba(255, 250, 240, 0.7);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.zone-button:hover,
+.zone-button.active {
+  background: rgba(255, 209, 102, 0.22);
+  border-color: rgba(255, 209, 102, 0.7);
+  transform: translateY(-2px);
+}
+
+.keeper {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 84px;
+  height: 112px;
+  transform: translate(-50%, -50%);
+  transition:
+    left 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms ease;
+}
+
+.keeper::before,
+.keeper::after {
+  content: '';
+  position: absolute;
+}
+
+.keeper::before {
+  inset: 24px 18px 0;
+  border-radius: 20px 20px 18px 18px;
+  background: linear-gradient(180deg, #ff6b6b, #b31c34);
+  box-shadow: inset 0 -10px 0 rgba(33, 7, 10, 0.22);
+}
+
+.keeper::after {
+  left: 50%;
+  top: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #f3d4b2;
+}
+
+.keeper.dive-left {
+  transform: translate(-50%, -50%) rotate(-24deg) scale(1.02);
+}
+
+.keeper.dive-right {
+  transform: translate(-50%, -50%) rotate(24deg) scale(1.02);
+}
+
+.ball {
+  position: absolute;
+  left: 50%;
+  top: 92%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%, #fff 0 28%, #111 29% 36%, #fff 37% 64%, #111 65% 72%, #fff 73% 100%);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.28);
+  transition:
+    left 760ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 760ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 760ms ease,
+    height 760ms ease;
+}
+
+.ball.shot {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+.penalty-spot {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.control-row,
+.insight-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.control-row {
+  grid-template-columns: 1fr 1fr;
+}
+
+.control-box p:last-child,
+.insight-card p:last-child,
+.history-list li {
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2em;
+  padding: 0.16em 0.5em;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 209, 102, 0.55);
+  background: rgba(255, 209, 102, 0.14);
+  color: #fff7e8;
+}
+
+.insight-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.insight-card {
+  padding: 22px;
+  border-radius: 22px;
+}
+
+.coach-card {
+  background:
+    linear-gradient(135deg, rgba(255, 183, 3, 0.16), rgba(255, 209, 102, 0.05)),
+    var(--panel);
+}
+
+.detail {
+  margin-top: 12px;
+}
+
+.history-card {
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 24px;
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reset-button {
+  border: 1px solid rgba(255, 209, 102, 0.6);
+  border-radius: 999px;
+  background: rgba(255, 209, 102, 0.12);
+  color: #fff5de;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.reset-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 209, 102, 0.24);
+}
+
+.history-list {
+  margin: 16px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 920px) {
+  .hero-panel,
+  .stadium-head,
+  .control-row,
+  .insight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pitch {
+    min-height: 500px;
+  }
+
+  .goal {
+    width: calc(100% - 36px);
+    height: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-shell {
+    width: min(100%, calc(100% - 14px));
+    padding-top: 10px;
+  }
+
+  .hero-panel,
+  .stadium-card,
+  .history-card,
+  .insight-card {
+    border-radius: 20px;
+  }
+
+  .hero-panel,
+  .stadium-card,
+  .history-card {
+    padding: 18px;
+  }
+
+  h1 {
+    max-width: none;
+  }
+
+  .pitch {
+    min-height: 420px;
+  }
+
+  .goal {
+    top: 12%;
+    height: 180px;
+  }
+
+  .zone-grid {
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .zone-button {
+    font-size: 0.82rem;
+  }
+}
