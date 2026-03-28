@@ -27,7 +27,7 @@ npm run build
 
 ## 操作
 
-- 敵画像の差し替え: 画面左の URL 入力欄に公開画像URLを貼って Save
+- 敵画像の差し替え: 画面左の URL 入力欄または画像ファイル選択
 - 開始前の敵選択: 左右キー
 - ゲーム開始: Enter
 - 移動: 矢印キー
@@ -36,9 +36,8 @@ npm run build
 
 ## 敵画像を任意画像にする方法
 
-1. PNG / JPG / WebP を公開URLで置ける場所にアップロード
-2. ゲーム画面左の `Enemy Image URL` にそのURLを貼る
-3. `Save` を押す
-4. 再読み込み後、開始前の敵選択に `CUSTOM` が追加されます
+1. いちばん簡単なのは、画面左の `Local Image File` で画像を選んで `Save File`
+2. または、公開URLを `Enemy Image URL` に貼って `Save URL`
+3. 再読み込み後、開始前の敵選択に `CUSTOM` が追加されます
 
-画像配信先は、GitHub Pages、Cloudflare R2 の公開バケット、または CORS 制限のない画像URLがおすすめです。
+ローカル画像ファイル保存ならアップロード先は不要です。URL利用時は CORS 制限のない公開画像URLを使ってください。

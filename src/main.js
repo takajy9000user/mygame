@@ -9,6 +9,7 @@ const ENEMY_SPEED_MIN = 120;
 const ENEMY_SPEED_MAX = 240;
 const FIRE_INTERVAL = 180;
 const CUSTOM_ENEMY_STORAGE_KEY = "mini-shooter-custom-enemy-url";
+const CUSTOM_ENEMY_STATUS_KEY = "mini-shooter-custom-enemy-status";
 const BASE_ENEMY_OPTIONS = [
   {
     key: "enemy-crab",
@@ -35,8 +36,27 @@ class ShooterScene extends Phaser.Scene {
   preload() {
     this.createTextures();
     this.customEnemyUrl = getCustomEnemyUrl();
+    this.load.setCORS("anonymous");
 
     if (this.customEnemyUrl) {
+      this.load.on(
+        Phaser.Loader.Events.FILE_LOAD_ERROR,
+        () => {
+          setCustomEnemyStatus(
+            "画像を読み込めませんでした。ローカル画像ファイルの保存も試してください"
+          );
+        },
+        this
+      );
+      this.load.once(
+        Phaser.Loader.Events.COMPLETE,
+        () => {
+          if (this.textures.exists("enemy-custom")) {
+            setCustomEnemyStatus("カスタム画像を読み込みました");
+          }
+        },
+        this
+      );
       this.load.image("enemy-custom", this.customEnemyUrl);
     }
   }
@@ -225,9 +245,7 @@ class ShooterScene extends Phaser.Scene {
 
     this.refreshEnemySelection();
     updateStatusMessage(
-      this.customEnemyUrl
-        ? "保存済みのカスタム画像を読み込みました"
-        : "公開URLの PNG / JPG / WebP を使えます"
+      getCustomEnemyStatus() || "公開URLかローカル画像ファイルを使えます"
     );
   }
 
@@ -453,6 +471,14 @@ function getCustomEnemyUrl() {
   return window.localStorage.getItem(CUSTOM_ENEMY_STORAGE_KEY)?.trim() || "";
 }
 
+function getCustomEnemyStatus() {
+  return window.localStorage.getItem(CUSTOM_ENEMY_STATUS_KEY)?.trim() || "";
+}
+
+function setCustomEnemyStatus(message) {
+  window.localStorage.setItem(CUSTOM_ENEMY_STATUS_KEY, message);
+}
+
 function updateStatusMessage(message) {
   const status = document.querySelector("#enemy-image-status");
 
@@ -463,10 +489,12 @@ function updateStatusMessage(message) {
 
 function setupCustomEnemyControls() {
   const input = document.querySelector("#enemy-image-url");
+  const fileInput = document.querySelector("#enemy-image-file");
   const saveButton = document.querySelector("#save-enemy-image");
+  const saveFileButton = document.querySelector("#save-enemy-file");
   const resetButton = document.querySelector("#reset-enemy-image");
 
-  if (!input || !saveButton || !resetButton) {
+  if (!input || !fileInput || !saveButton || !saveFileButton || !resetButton) {
     return;
   }
 
@@ -481,15 +509,49 @@ function setupCustomEnemyControls() {
     }
 
     window.localStorage.setItem(CUSTOM_ENEMY_STORAGE_KEY, url);
-    updateStatusMessage("保存しました。ページを再読み込みします");
+    setCustomEnemyStatus("URLを保存しました。画像を読み込みます");
+    updateStatusMessage("URLを保存しました。ページを再読み込みします");
     window.setTimeout(() => {
       window.location.reload();
     }, 500);
   });
 
+  saveFileButton.addEventListener("click", () => {
+    const file = fileInput.files?.[0];
+
+    if (!file) {
+      updateStatusMessage("画像ファイルを選択してください");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        updateStatusMessage("画像の読み込みに失敗しました");
+        return;
+      }
+
+      window.localStorage.setItem(CUSTOM_ENEMY_STORAGE_KEY, reader.result);
+      setCustomEnemyStatus("ローカル画像を保存しました。画像を読み込みます");
+      updateStatusMessage("ローカル画像を保存しました。ページを再読み込みします");
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    };
+
+    reader.onerror = () => {
+      updateStatusMessage("画像ファイルの読み込みに失敗しました");
+    };
+
+    reader.readAsDataURL(file);
+  });
+
   resetButton.addEventListener("click", () => {
     input.value = "";
+    fileInput.value = "";
     window.localStorage.removeItem(CUSTOM_ENEMY_STORAGE_KEY);
+    window.localStorage.removeItem(CUSTOM_ENEMY_STATUS_KEY);
     updateStatusMessage("カスタム画像を削除しました。ページを再読み込みします");
     window.setTimeout(() => {
       window.location.reload();

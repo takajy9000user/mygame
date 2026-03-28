@@ -85,6 +85,10 @@ canvas {
   color: #8ca1b7;
 }
 
+.panel-file {
+  padding: 10px 12px;
+}
+
 .panel-actions {
   display: flex;
   gap: 10px;
@@ -114,5 +118,9 @@ canvas {
 
   .control-panel {
     width: min(100%, 480px);
+  }
+
+  .panel-actions {
+    flex-wrap: wrap;
   }
 }
