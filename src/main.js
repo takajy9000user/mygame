@@ -8,7 +8,8 @@ const BULLET_SPEED = 520;
 const ENEMY_SPEED_MIN = 120;
 const ENEMY_SPEED_MAX = 240;
 const FIRE_INTERVAL = 180;
-const ENEMY_OPTIONS = [
+const CUSTOM_ENEMY_STORAGE_KEY = "mini-shooter-custom-enemy-url";
+const BASE_ENEMY_OPTIONS = [
   {
     key: "enemy-crab",
     name: "CRAB",
@@ -33,6 +34,11 @@ class ShooterScene extends Phaser.Scene {
 
   preload() {
     this.createTextures();
+    this.customEnemyUrl = getCustomEnemyUrl();
+
+    if (this.customEnemyUrl) {
+      this.load.image("enemy-custom", this.customEnemyUrl);
+    }
   }
 
   create() {
@@ -41,6 +47,7 @@ class ShooterScene extends Phaser.Scene {
     this.gameStarted = false;
     this.lastFiredAt = 0;
     this.selectedEnemyIndex = 0;
+    this.enemyOptions = this.buildEnemyOptions();
 
     this.add.rectangle(
       GAME_WIDTH / 2,
@@ -131,7 +138,7 @@ class ShooterScene extends Phaser.Scene {
       .setDepth(10);
 
     this.enemyPreview = this.add
-      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, ENEMY_OPTIONS[0].key)
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, this.enemyOptions[0].key)
       .setScale(4)
       .setDepth(10);
 
@@ -217,6 +224,11 @@ class ShooterScene extends Phaser.Scene {
     });
 
     this.refreshEnemySelection();
+    updateStatusMessage(
+      this.customEnemyUrl
+        ? "保存済みのカスタム画像を読み込みました"
+        : "公開URLの PNG / JPG / WebP を使えます"
+    );
   }
 
   update(time, delta) {
@@ -348,14 +360,14 @@ class ShooterScene extends Phaser.Scene {
     const enemy = this.enemies.get(
       Phaser.Math.Between(28, GAME_WIDTH - 28),
       -32,
-      ENEMY_OPTIONS[this.selectedEnemyIndex].key
+      this.enemyOptions[this.selectedEnemyIndex].key
     );
 
     if (!enemy) {
       return;
     }
 
-    enemy.setTexture(ENEMY_OPTIONS[this.selectedEnemyIndex].key);
+    enemy.setTexture(this.enemyOptions[this.selectedEnemyIndex].key);
     enemy.setActive(true);
     enemy.setVisible(true);
     enemy.body.enable = true;
@@ -379,14 +391,14 @@ class ShooterScene extends Phaser.Scene {
   }
 
   changeEnemySelection(direction) {
-    const total = ENEMY_OPTIONS.length;
+    const total = this.enemyOptions.length;
     this.selectedEnemyIndex =
       (this.selectedEnemyIndex + direction + total) % total;
     this.refreshEnemySelection();
   }
 
   refreshEnemySelection() {
-    const selected = ENEMY_OPTIONS[this.selectedEnemyIndex];
+    const selected = this.enemyOptions[this.selectedEnemyIndex];
     this.enemyPreview.setTexture(selected.key);
     this.enemyNameText.setText(selected.name);
     this.enemyNameText.setColor(selected.accent);
@@ -394,7 +406,8 @@ class ShooterScene extends Phaser.Scene {
     const flavorTextByEnemy = {
       CRAB: "SIDE STEPPER\nCLASSIC RED INVADER",
       SKULL: "BONE CHILLER\nGREEN PANIC WAVE",
-      UFO: "CITY POP RAIDER\nSMOOTH BLUE GLIDER"
+      UFO: "CITY POP RAIDER\nSMOOTH BLUE GLIDER",
+      CUSTOM: "YOUR UPLOADED ENEMY\nFROM A PUBLIC IMAGE URL"
     };
 
     this.enemyFlavorText.setText(flavorTextByEnemy[selected.name]);
@@ -412,14 +425,76 @@ class ShooterScene extends Phaser.Scene {
     this.enemyFlavorText.setVisible(false);
     this.selectionMarkers.forEach((marker) => marker.setVisible(false));
     this.guideText.setText(
-      `ENEMY: ${ENEMY_OPTIONS[this.selectedEnemyIndex].name} / FIRE: Space`
+      `ENEMY: ${this.enemyOptions[this.selectedEnemyIndex].name} / FIRE: Space`
     );
+  }
+
+  buildEnemyOptions() {
+    const enemyOptions = [...BASE_ENEMY_OPTIONS];
+
+    if (this.textures.exists("enemy-custom")) {
+      enemyOptions.push({
+        key: "enemy-custom",
+        name: "CUSTOM",
+        accent: "#ffd166"
+      });
+    }
+
+    return enemyOptions;
   }
 
   recycleGameObject(gameObject) {
     gameObject.disableBody(true, true);
     gameObject.setVelocity(0, 0);
   }
+}
+
+function getCustomEnemyUrl() {
+  return window.localStorage.getItem(CUSTOM_ENEMY_STORAGE_KEY)?.trim() || "";
+}
+
+function updateStatusMessage(message) {
+  const status = document.querySelector("#enemy-image-status");
+
+  if (status) {
+    status.textContent = message;
+  }
+}
+
+function setupCustomEnemyControls() {
+  const input = document.querySelector("#enemy-image-url");
+  const saveButton = document.querySelector("#save-enemy-image");
+  const resetButton = document.querySelector("#reset-enemy-image");
+
+  if (!input || !saveButton || !resetButton) {
+    return;
+  }
+
+  input.value = getCustomEnemyUrl();
+
+  saveButton.addEventListener("click", () => {
+    const url = input.value.trim();
+
+    if (!url) {
+      updateStatusMessage("画像URLを入力してください");
+      return;
+    }
+
+    window.localStorage.setItem(CUSTOM_ENEMY_STORAGE_KEY, url);
+    updateStatusMessage("保存しました。ページを再読み込みします");
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  });
+
+  resetButton.addEventListener("click", () => {
+    input.value = "";
+    window.localStorage.removeItem(CUSTOM_ENEMY_STORAGE_KEY);
+    updateStatusMessage("カスタム画像を削除しました。ページを再読み込みします");
+    window.setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  });
 }
 
 const config = {
@@ -441,4 +516,5 @@ const config = {
   scene: [ShooterScene]
 };
 
+setupCustomEnemyControls();
 new Phaser.Game(config);

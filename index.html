@@ -10,7 +10,31 @@
     />
   </head>
   <body>
+    <section class="control-panel">
+      <h1>Mini Shooter</h1>
+      <p class="panel-copy">
+        敵画像のURLを入れると、ゲーム開始前に選べるようになります。
+      </p>
+      <label class="panel-label" for="enemy-image-url">Enemy Image URL</label>
+      <input
+        id="enemy-image-url"
+        class="panel-input"
+        type="url"
+        placeholder="https://example.com/enemy.png"
+      />
+      <div class="panel-actions">
+        <button id="save-enemy-image" class="panel-button" type="button">
+          Save
+        </button>
+        <button id="reset-enemy-image" class="panel-button ghost" type="button">
+          Reset
+        </button>
+      </div>
+      <p id="enemy-image-status" class="panel-status">
+        公開URLの PNG / JPG / WebP を使えます
+      </p>
+    </section>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
-  </html>
+</html>
