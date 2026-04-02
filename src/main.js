@@ -182,6 +182,7 @@ app.innerHTML = `
         <h3>前回の結果</h3>
         <p id="result-text">1本目が始まります。まずはキーパーの傾向を読んでみましょう。</p>
         <p id="result-detail" class="detail">高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。</p>
+        <p id="ending-credit" class="detail" hidden>ゆうと作</p>
       </article>
     </section>
 
@@ -210,6 +211,7 @@ const coachDetailEl = document.querySelector('#coach-detail')
 const keeperHintEl = document.querySelector('#keeper-hint')
 const resultTextEl = document.querySelector('#result-text')
 const resultDetailEl = document.querySelector('#result-detail')
+const endingCreditEl = document.querySelector('#ending-credit')
 const historyListEl = document.querySelector('#history-list')
 const ballEl = document.querySelector('#ball')
 const keeperEl = document.querySelector('#keeper')
@@ -348,6 +350,7 @@ function finishMatchIfNeeded() {
 
   resultTextEl.textContent = `試合終了 ${state.goals} / ${state.maxShots}本成功`
   resultDetailEl.textContent = verdict
+  endingCreditEl.hidden = false
 }
 
 function takeShot() {
@@ -430,6 +433,7 @@ function resetGame() {
   renderHistory()
   resultTextEl.textContent = '1本目が始まります。まずはキーパーの傾向を読んでみましょう。'
   resultDetailEl.textContent = '高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。'
+  endingCreditEl.hidden = true
 }
 
 function updateAim(direction) {
@@ -477,4 +481,5 @@ shootButton.addEventListener('click', takeShot)
 resetButton.addEventListener('click', resetGame)
 
 resetGame()
+
 
