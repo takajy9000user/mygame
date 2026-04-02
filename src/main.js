@@ -1,4 +1,4 @@
-import './style.css'
+﻿import './style.css'
 
 const zones = [
   {
@@ -7,7 +7,7 @@ const zones = [
     x: 18,
     y: 20,
     risk: 0.44,
-    learning: '左上は止めにくい反面、パワー不足だと高さが足りず読まれやすいコースです。',
+    learning: '左上は止めにくい反面、強く蹴りすぎると外れやすいコースです。',
   },
   {
     id: 'top-center',
@@ -15,7 +15,7 @@ const zones = [
     x: 50,
     y: 18,
     risk: 0.62,
-    learning: '上中央は威力が出てもキーパーの手が届きやすく、読み勝ちが重要です。',
+    learning: '上中央は迫力がありますが、力加減が難しい上級者向けです。',
   },
   {
     id: 'top-right',
@@ -23,7 +23,7 @@ const zones = [
     x: 82,
     y: 20,
     risk: 0.44,
-    learning: '右上は高得点エリア。狙いは強いですが、強く蹴りすぎると枠を外しやすくなります。',
+    learning: '右上は人気のコースです。角度は良いですが、強すぎると外れやすくなります。',
   },
   {
     id: 'bottom-left',
@@ -31,7 +31,7 @@ const zones = [
     x: 20,
     y: 66,
     risk: 0.2,
-    learning: '左下は安定しやすい定番コース。コントロール重視で成功率が伸びます。',
+    learning: '左下は安定しやすいコースです。コントロール重視で決めやすくなります。',
   },
   {
     id: 'bottom-center',
@@ -39,7 +39,7 @@ const zones = [
     x: 50,
     y: 68,
     risk: 0.5,
-    learning: '下中央は安全そうでも、キーパーが残ると止められやすいので読み合い向きです。',
+    learning: '下中央は読みやすいので、キーパーの動きを見て使い分けるのが大切です。',
   },
   {
     id: 'bottom-right',
@@ -47,25 +47,25 @@ const zones = [
     x: 80,
     y: 66,
     risk: 0.2,
-    learning: '右下は再現性の高いコース。キーパーの癖を見て逆を取るとかなり有効です。',
+    learning: '右下も安定しやすいコースです。落ち着いて狙うと成功しやすくなります。',
   },
 ]
 
 const keeperProfiles = [
   {
-    name: '反応型',
+    name: 'かがみ型',
     bias: ['bottom-left', 'bottom-right', 'top-left', 'top-right', 'bottom-center', 'top-center'],
-    hint: '低いシュートへの反応が速いタイプ。高いコースは届きにくいです。',
+    hint: '低いシュートによく反応します。高いコースは比較的空きやすいです。',
   },
   {
-    name: '読み型',
+    name: '読み勝ち型',
     bias: ['top-right', 'bottom-right', 'top-left', 'bottom-left', 'bottom-center', 'top-center'],
-    hint: 'キッカーの利き足を読むタイプ。右側へ先回りしやすい傾向があります。',
+    hint: '右側を先に読むタイプです。反対側へ打つと決まりやすくなります。',
   },
   {
-    name: '待機型',
+    name: '中央待ち型',
     bias: ['bottom-center', 'top-center', 'bottom-left', 'bottom-right', 'top-left', 'top-right'],
-    hint: '最後まで中央に残りがち。左右の隅を丁寧に狙うと崩しやすいです。',
+    hint: 'まず中央を固めます。左右の角を狙うとチャンスです。',
   },
 ]
 
@@ -88,15 +88,14 @@ app.innerHTML = `
     <section class="hero-panel">
       <div>
         <p class="eyebrow">Penalty Kick Lab</p>
-        <h1>PKで勝ちながら、駆け引きも学ぶ。</h1>
+        <h1>PKで読み合いながら楽しく学ぶ</h1>
         <p class="intro">
-          あなたはキッカーです。キーパーはコンピューターが担当します。
-          <strong>矢印キーで狙いと強さを調整し、Spaceでシュート。</strong>
+          ねらう場所とキックの強さを選んでシュート。<strong>キーパーの動きを読んで、5本の勝負でできるだけ多く決めよう。</strong>
         </p>
       </div>
       <div class="score-card">
         <div>
-          <span>成功</span>
+          <span>ゴール</span>
           <strong id="score">0</strong>
         </div>
         <div>
@@ -113,15 +112,15 @@ app.innerHTML = `
     <section class="stadium-card">
       <div class="stadium-head">
         <div>
-          <p class="label">現在の狙い</p>
+          <p class="label">今のねらい</p>
           <h2 id="aim-label">右下</h2>
         </div>
         <div>
-          <p class="label">キーパー傾向</p>
-          <h2 id="keeper-name">反応型</h2>
+          <p class="label">キーパーのタイプ</p>
+          <h2 id="keeper-name">かがみ型</h2>
         </div>
         <div>
-          <p class="label">キック威力</p>
+          <p class="label">キック強さ</p>
           <h2><span id="power-label">72</span>%</h2>
         </div>
       </div>
@@ -146,19 +145,27 @@ app.innerHTML = `
       <div class="control-row">
         <div class="control-box">
           <p class="label">操作</p>
-          <p>狙い: <kbd>←</kbd> <kbd>→</kbd> / 威力: <kbd>↑</kbd> <kbd>↓</kbd> / シュート: <kbd>Space</kbd></p>
+          <p>ゴール内をタップしてコースを選び、下のボタンで強さを調整してシュート。</p>
         </div>
         <div class="control-box">
-          <p class="label">成功率メモ</p>
-          <p id="success-note">右下は安定したコースです。キーパーが中央待ちなら特に有効です。</p>
+          <p class="label">成功メモ</p>
+          <p id="success-note">右下は安定しやすいコースです。キーパーが中央に強いときに有効です。</p>
         </div>
+      </div>
+
+      <div class="mobile-controls" aria-label="タッチ操作パネル">
+        <button id="aim-prev" class="action-button secondary" type="button">ねらい ←</button>
+        <button id="power-down" class="action-button secondary" type="button">パワー -</button>
+        <button id="shoot-button" class="action-button primary" type="button">シュート</button>
+        <button id="power-up" class="action-button secondary" type="button">パワー +</button>
+        <button id="aim-next" class="action-button secondary" type="button">ねらい →</button>
       </div>
     </section>
 
     <section class="insight-grid">
       <article class="insight-card coach-card">
         <p class="eyebrow">Coach Note</p>
-        <h3>今回の学び</h3>
+        <h3>コーチの学び</h3>
         <p id="coach-tip"></p>
         <p id="coach-detail" class="detail"></p>
       </article>
@@ -167,14 +174,14 @@ app.innerHTML = `
         <p class="eyebrow">Scout Report</p>
         <h3>相手の傾向</h3>
         <p id="keeper-hint"></p>
-        <p class="detail">ラウンドごとにキーパーの癖が少し変わります。毎回同じ場所を狙わないのがコツです。</p>
+        <p class="detail">ラウンドごとにキーパーのねらいが少し変わります。次の1本を考えながら打つのがコツです。</p>
       </article>
 
       <article class="insight-card">
         <p class="eyebrow">Last Shot</p>
-        <h3>直前の判定</h3>
-        <p id="result-text">1本目が始まる前です。まずはキーパーの傾向を読んでみましょう。</p>
-        <p id="result-detail" class="detail">高い隅は強いですが、リスクもあります。低い隅は安定しやすいです。</p>
+        <h3>前回の結果</h3>
+        <p id="result-text">1本目が始まります。まずはキーパーの傾向を読んでみましょう。</p>
+        <p id="result-detail" class="detail">高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。</p>
       </article>
     </section>
 
@@ -182,9 +189,9 @@ app.innerHTML = `
       <div class="history-head">
         <div>
           <p class="eyebrow">Round Log</p>
-          <h3>試合ログ</h3>
+          <h3>プレーログ</h3>
         </div>
-        <button id="reset-button" class="reset-button" type="button">最初からやる</button>
+        <button id="reset-button" class="reset-button" type="button">もう一度遊ぶ</button>
       </div>
       <ol id="history-list" class="history-list"></ol>
     </section>
@@ -208,6 +215,11 @@ const ballEl = document.querySelector('#ball')
 const keeperEl = document.querySelector('#keeper')
 const resetButton = document.querySelector('#reset-button')
 const zoneButtons = [...document.querySelectorAll('.zone-button')]
+const aimPrevButton = document.querySelector('#aim-prev')
+const aimNextButton = document.querySelector('#aim-next')
+const powerDownButton = document.querySelector('#power-down')
+const powerUpButton = document.querySelector('#power-up')
+const shootButton = document.querySelector('#shoot-button')
 
 function getZone(index = state.aimIndex) {
   return zones[index]
@@ -245,12 +257,14 @@ function renderHud() {
   const zone = getZone()
   const { scoreChance, biasRank } = estimateShotQuality(zone, state.power)
   const percent = Math.round(scoreChance * 100)
-  const biasText =
-    biasRank <= 1
-      ? 'キーパーが読みやすいコースです。逆を狙うと成功率が上がります。'
-      : biasRank >= 4
-        ? 'キーパーの意識が薄いコースです。読み勝ちしやすい狙い目です。'
-        : '読み合いになるコースです。威力とコースのバランスが重要です。'
+
+  let biasText = '読み合いになりやすいコースです。強さとのバランスが大切です。'
+
+  if (biasRank <= 1) {
+    biasText = 'キーパーが読みやすいコースです。反対側を狙うと成功率が上がります。'
+  } else if (biasRank >= 4) {
+    biasText = 'キーパーの意識が薄いコースです。読み勝ちしやすい狙い目です。'
+  }
 
   scoreEl.textContent = String(state.goals)
   savesEl.textContent = String(state.saves)
@@ -258,8 +272,8 @@ function renderHud() {
   aimLabelEl.textContent = zone.label
   keeperNameEl.textContent = state.keeperProfile.name
   powerLabelEl.textContent = String(state.power)
-  successNoteEl.textContent = `予想成功率は${percent}%前後。${biasText}`
-  coachTipEl.textContent = `${zone.label}を${state.power}%で狙う設定です。`
+  successNoteEl.textContent = `予想成功率 ${percent}%。${biasText}`
+  coachTipEl.textContent = `${zone.label}へ ${state.power}% で蹴る作戦です。`
   coachDetailEl.textContent = zone.learning
   keeperHintEl.textContent = state.keeperProfile.hint
 
@@ -276,8 +290,7 @@ function renderHistory() {
 
   historyListEl.innerHTML = state.history
     .map(
-      (entry) =>
-        `<li><strong>${entry.label}</strong> ${entry.outcome}。${entry.note}</li>`,
+      (entry) => `<li><strong>${entry.label}</strong> ${entry.outcome}。${entry.note}</li>`,
     )
     .join('')
 }
@@ -297,21 +310,10 @@ function chooseKeeperDive(targetZone) {
   const profile = state.keeperProfile
   const weightedChoice = Math.random()
 
-  if (weightedChoice < 0.48) {
-    return profile.bias[0]
-  }
-
-  if (weightedChoice < 0.78) {
-    return profile.bias[1]
-  }
-
-  if (weightedChoice < 0.9) {
-    return profile.bias[2]
-  }
-
-  if (weightedChoice < 0.95) {
-    return targetZone.id
-  }
+  if (weightedChoice < 0.48) return profile.bias[0]
+  if (weightedChoice < 0.78) return profile.bias[1]
+  if (weightedChoice < 0.9) return profile.bias[2]
+  if (weightedChoice < 0.95) return targetZone.id
 
   return profile.bias[Math.floor(Math.random() * profile.bias.length)]
 }
@@ -336,14 +338,15 @@ function finishMatchIfNeeded() {
     return
   }
 
-  const verdict =
-    state.goals >= 4
-      ? 'すばらしいPK職人です。キーパーの傾向を見ながら逆を取れていました。'
-      : state.goals >= 2
-        ? '読み合いはできています。次は高低の使い分けを増やすとさらに伸びます。'
-        : '今回はキーパーに読まれました。次は同じコースの連続を減らすのがコツです。'
+  let verdict = 'コースの使い分けを続けると、もっと決定率を上げられます。'
 
-  resultTextEl.textContent = `試合終了: ${state.goals} / ${state.maxShots}本成功`
+  if (state.goals >= 4) {
+    verdict = 'すばらしいPK名人です。キーパーの傾向を見ながら落ち着いて決められました。'
+  } else if (state.goals >= 2) {
+    verdict = '読み合いはできています。次は苦手なコースにも挑戦するとさらに良くなります。'
+  }
+
+  resultTextEl.textContent = `試合終了 ${state.goals} / ${state.maxShots}本成功`
   resultDetailEl.textContent = verdict
 }
 
@@ -371,24 +374,24 @@ function takeShot() {
     let note = ''
 
     if (isMiss) {
-      outcome = '枠外'
+      outcome = 'ミス'
       note =
         state.power >= 88
-          ? '強く蹴りすぎて精度が落ちました。高いコースは特に威力とのバランスが大切です。'
-          : '狙いは良かったですが、コースが甘くなりました。'
+          ? '強く蹴りすぎて外れました。高いコースでは力加減が特に大切です。'
+          : 'コースは良かったですが、少しだけずれました。'
     } else if (isGoal) {
       state.goals += 1
       note =
         biasRank >= 3
-          ? 'キーパーの意識が薄いコースを突けました。観察が得点につながっています。'
-          : '読み合いを制しました。威力とコースの組み合わせが良かったです。'
+          ? 'キーパーの逆を取れました。読み勝ちできたナイスシュートです。'
+          : '狙いと強さがかみ合いました。落ち着いて決められました。'
     } else {
       state.saves += 1
       outcome = 'セーブ'
       note =
         keeperReadsShot
-          ? 'キーパーに読まれました。同じ高さや同じ側を続けると対応されやすいです。'
-          : 'コースは悪くありませんでしたが、威力か高さを少し変える余地があります。'
+          ? 'キーパーに読まれました。次は反対のコースも試してみましょう。'
+          : 'コースは悪くありませんでしたが、相手の反応が少し上回りました。'
     }
 
     state.history.unshift({
@@ -425,8 +428,8 @@ function resetGame() {
   resetActors()
   renderHud()
   renderHistory()
-  resultTextEl.textContent = '1本目が始まる前です。まずはキーパーの傾向を読んでみましょう。'
-  resultDetailEl.textContent = '高い隅は強いですが、リスクもあります。低い隅は安定しやすいです。'
+  resultTextEl.textContent = '1本目が始まります。まずはキーパーの傾向を読んでみましょう。'
+  resultDetailEl.textContent = '高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。'
 }
 
 function updateAim(direction) {
@@ -453,7 +456,7 @@ document.addEventListener('keydown', (event) => {
   } else if (event.code === 'ArrowDown') {
     event.preventDefault()
     updatePower(-1)
-  } else if (event.code === 'Space') {
+  } else if (event.code === 'Space' || event.code === 'Enter') {
     event.preventDefault()
     takeShot()
   }
@@ -466,6 +469,11 @@ zoneButtons.forEach((button, index) => {
   })
 })
 
+aimPrevButton.addEventListener('click', () => updateAim(-1))
+aimNextButton.addEventListener('click', () => updateAim(1))
+powerDownButton.addEventListener('click', () => updatePower(-1))
+powerUpButton.addEventListener('click', () => updatePower(1))
+shootButton.addEventListener('click', takeShot)
 resetButton.addEventListener('click', resetGame)
 
 resetGame()

@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   font-family: Georgia, 'Times New Roman', serif;
   color: #f6f0de;
   background:
@@ -23,6 +23,10 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -31,6 +35,11 @@ body {
 button,
 kbd {
   font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 #app {
@@ -210,9 +219,10 @@ h1 {
 .zone-button {
   border: 1px dashed rgba(255, 255, 255, 0.18);
   background: rgba(12, 35, 28, 0.18);
-  color: rgba(255, 250, 240, 0.7);
+  color: rgba(255, 250, 240, 0.82);
   border-radius: 12px;
   cursor: pointer;
+  min-height: 56px;
   transition:
     transform 180ms ease,
     background 180ms ease,
@@ -321,6 +331,31 @@ h1 {
   line-height: 1.6;
 }
 
+.mobile-controls {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.action-button {
+  min-height: 56px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 209, 102, 0.5);
+  color: #fff9eb;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.action-button.secondary {
+  background: rgba(255, 209, 102, 0.1);
+}
+
+.action-button.primary {
+  background: linear-gradient(180deg, #ffce54, #ef9d17);
+  color: #2b1600;
+}
+
 kbd {
   display: inline-flex;
   align-items: center;
@@ -393,7 +428,8 @@ kbd {
   .hero-panel,
   .stadium-head,
   .control-row,
-  .insight-grid {
+  .insight-grid,
+  .mobile-controls {
     grid-template-columns: 1fr;
   }
 
@@ -411,6 +447,7 @@ kbd {
   .game-shell {
     width: min(100%, calc(100% - 14px));
     padding-top: 10px;
+    padding-bottom: 28px;
   }
 
   .hero-panel,
@@ -428,6 +465,7 @@ kbd {
 
   h1 {
     max-width: none;
+    font-size: clamp(2rem, 10vw, 3rem);
   }
 
   .pitch {
@@ -445,6 +483,11 @@ kbd {
   }
 
   .zone-button {
-    font-size: 0.82rem;
+    font-size: 0.9rem;
+    min-height: 52px;
+  }
+
+  .action-button {
+    min-height: 52px;
   }
 }
