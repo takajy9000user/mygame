@@ -142,6 +142,14 @@ app.innerHTML = `
         <div class="penalty-spot"></div>
       </div>
 
+      <div class="mobile-controls" aria-label="タッチ操作パネル">
+        <button id="aim-prev" class="action-button secondary" type="button">ねらい ←</button>
+        <button id="power-down" class="action-button secondary" type="button">パワー -</button>
+        <button id="shoot-button" class="action-button primary" type="button">シュート</button>
+        <button id="power-up" class="action-button secondary" type="button">パワー +</button>
+        <button id="aim-next" class="action-button secondary" type="button">ねらい →</button>
+      </div>
+
       <div class="control-row">
         <div class="control-box">
           <p class="label">操作</p>
@@ -151,14 +159,6 @@ app.innerHTML = `
           <p class="label">成功メモ</p>
           <p id="success-note">右下は安定しやすいコースです。キーパーが中央に強いときに有効です。</p>
         </div>
-      </div>
-
-      <div class="mobile-controls" aria-label="タッチ操作パネル">
-        <button id="aim-prev" class="action-button secondary" type="button">ねらい ←</button>
-        <button id="power-down" class="action-button secondary" type="button">パワー -</button>
-        <button id="shoot-button" class="action-button primary" type="button">シュート</button>
-        <button id="power-up" class="action-button secondary" type="button">パワー +</button>
-        <button id="aim-next" class="action-button secondary" type="button">ねらい →</button>
       </div>
     </section>
 
@@ -477,3 +477,4 @@ shootButton.addEventListener('click', takeShot)
 resetButton.addEventListener('click', resetGame)
 
 resetGame()
+
