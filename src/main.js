@@ -1,182 +1,103 @@
 import './style.css'
 
-const quizBank = [
+const cards = [
   {
-    maker: 'Toyota',
-    model: 'GR Supra',
-    question: 'トヨタのスポーツカー「GR Supra」はどれ？',
-    choices: ['GR Supra', 'Prius', 'Alphard', 'Aqua'],
-    answerIndex: 0,
-    reward: 60,
-    explanation: 'GR Supra はトヨタの代表的なスポーツカーです。',
+    id: 'orange-cash',
+    name: 'Orange Cash',
+    theme: 'キャッシュバック',
+    limit: 22000,
+    color: '#fb923c',
+    bonus: {
+      supermarket: 2.2,
+      convenience: 1.8,
+      default: 1.1,
+    },
+    text: 'スーパーとコンビニでポイントが伸びる使いやすいカード。',
   },
   {
-    maker: 'Nissan',
-    model: 'GT-R',
-    question: '日産の高性能スポーツモデルとして有名なのはどれ？',
-    choices: ['Serena', 'NOTE', 'GT-R', 'Cube'],
-    answerIndex: 2,
-    reward: 65,
-    explanation: 'GT-R は日産を代表する高性能スポーツモデルです。',
+    id: 'sky-miles',
+    name: 'Sky Miles',
+    theme: 'トラベル',
+    limit: 26000,
+    color: '#38bdf8',
+    bonus: {
+      train: 2.4,
+      travel: 2.8,
+      default: 1,
+    },
+    text: '電車や旅行の支払いに強い空色カード。',
   },
   {
-    maker: 'Mazda',
-    model: 'Roadster',
-    question: 'マツダの軽快なオープンスポーツカーはどれ？',
-    choices: ['CX-5', 'Roadster', 'Demio', 'Bongo'],
-    answerIndex: 1,
-    reward: 55,
-    explanation: 'Roadster は軽さとハンドリングが魅力のスポーツカーです。',
-  },
-  {
-    maker: 'Subaru',
-    model: 'BRZ',
-    question: 'スバルのFRスポーツクーペはどれ？',
-    choices: ['Forester', 'BRZ', 'Levorg', 'Justy'],
-    answerIndex: 1,
-    reward: 55,
-    explanation: 'BRZ は低重心でコーナリングが楽しいFRスポーツです。',
-  },
-  {
-    maker: 'Honda',
-    model: 'NSX',
-    question: 'ホンダのスーパースポーツとして知られる車はどれ？',
-    choices: ['Fit', 'N-BOX', 'Stepwgn', 'NSX'],
-    answerIndex: 3,
-    reward: 70,
-    explanation: 'NSX はホンダのスーパースポーツです。',
-  },
-  {
-    maker: 'Suzuki',
-    model: 'Swift Sport',
-    question: 'スズキのコンパクトスポーツモデルはどれ？',
-    choices: ['Hustler', 'Jimny', 'Swift Sport', 'Solio'],
-    answerIndex: 2,
-    reward: 50,
-    explanation: 'Swift Sport は軽快な走りが人気のコンパクトスポーツです。',
-  },
-  {
-    maker: 'Mitsubishi',
-    model: 'Lancer Evolution',
-    question: '三菱のラリー系スポーツセダンとして有名なのはどれ？',
-    choices: ['Delica', 'Lancer Evolution', 'eK Wagon', 'Outlander'],
-    answerIndex: 1,
-    reward: 65,
-    explanation: 'Lancer Evolution はラリーでも活躍したスポーツセダンです。',
-  },
-  {
-    maker: 'Toyota',
-    model: '86',
-    question: 'トヨタのFRスポーツカーはどれ？',
-    choices: ['Crown', '86', 'Voxy', 'Sienta'],
-    answerIndex: 1,
-    reward: 55,
-    explanation: '86 は操る楽しさを重視したFRスポーツカーです。',
+    id: 'green-family',
+    name: 'Green Family',
+    theme: 'まいにち',
+    limit: 18000,
+    color: '#4ade80',
+    bonus: {
+      online: 2.3,
+      bookstore: 1.9,
+      default: 1.4,
+    },
+    text: 'ネット注文や本の買い物が得意な安定カード。',
   },
 ]
 
-const cars = [
+const scenarios = [
   {
-    id: 'starter',
-    name: 'Street One',
-    maker: 'Starter',
-    price: 0,
-    color: '#7dd3fc',
-    speed: 2.6,
-    accel: 0.08,
-    grip: 0.88,
-    drift: 1.0,
-    owned: true,
-    description: '最初から使える入門FR。扱いやすい。',
+    title: '放課後のおやつ',
+    category: 'convenience',
+    categoryLabel: 'コンビニ',
+    amount: 780,
+    description: '飲み物とおやつを買うことにした。',
   },
   {
-    id: 'swift',
-    name: 'Swift Sport',
-    maker: 'Suzuki',
-    price: 140,
-    color: '#facc15',
-    speed: 2.9,
-    accel: 0.085,
-    grip: 0.84,
-    drift: 1.08,
-    description: '軽くて振り回しやすいホットハッチ。',
+    title: '家族の買い出し',
+    category: 'supermarket',
+    categoryLabel: 'スーパー',
+    amount: 4200,
+    description: '週末の食材をまとめて買う。',
   },
   {
-    id: 'brz',
-    name: 'BRZ',
-    maker: 'Subaru',
-    price: 220,
-    color: '#60a5fa',
-    speed: 3.15,
-    accel: 0.09,
-    grip: 0.8,
-    drift: 1.2,
-    description: 'バランスの良いFRクーペ。ドリフトの基本向け。',
+    title: '遠足の切符',
+    category: 'train',
+    categoryLabel: '電車',
+    amount: 1650,
+    description: '電車で科学館へ行くための切符代。',
   },
   {
-    id: 'supra',
-    name: 'GR Supra',
-    maker: 'Toyota',
-    price: 320,
-    color: '#fb7185',
-    speed: 3.45,
-    accel: 0.1,
-    grip: 0.75,
-    drift: 1.35,
-    description: '大パワーで角度を作りやすい上級モデル。',
+    title: '図鑑を注文',
+    category: 'online',
+    categoryLabel: 'ネットショップ',
+    amount: 3200,
+    description: '宇宙の図鑑をネットで注文する。',
   },
   {
-    id: 'gtr',
-    name: 'GT-R',
-    maker: 'Nissan',
-    price: 420,
-    color: '#c084fc',
-    speed: 3.7,
-    accel: 0.105,
-    grip: 0.82,
-    drift: 1.22,
-    description: '加速が鋭いハイパワー車。立ち上がりが速い。',
+    title: '旅行のホテル',
+    category: 'travel',
+    categoryLabel: '旅行',
+    amount: 9800,
+    description: '家族旅行のホテルを予約する。',
+  },
+  {
+    title: '新しい本を買う',
+    category: 'bookstore',
+    categoryLabel: '本屋',
+    amount: 1800,
+    description: '好きなシリーズの新刊が出た。',
   },
 ]
 
 const state = {
-  coins: 80,
-  currentQuestion: null,
-  answerResolved: false,
-  selectedCarId: 'starter',
-  garage: cars.map((car) => ({ ...car })),
+  round: 1,
+  maxRounds: scenarios.length,
+  currentScenario: null,
+  points: 0,
+  stars: 3,
+  deck: [],
   history: [],
-  quizDeck: [],
-  driftScore: 0,
-  bestScore: 0,
-  driftStatus: 'アクセルで加速、左右で向きを変えよう。',
-}
-
-const input = {
-  up: false,
-  down: false,
-  left: false,
-  right: false,
-}
-
-const track = {
-  width: 880,
-  height: 440,
-  centerX: 440,
-  centerY: 220,
-  outerRx: 340,
-  outerRy: 150,
-  innerRx: 220,
-  innerRy: 70,
-}
-
-const carState = {
-  x: track.centerX,
-  y: track.centerY + 110,
-  angle: -Math.PI / 2,
-  velocityX: 0,
-  velocityY: 0,
-  driftChain: 0,
+  cardUsage: Object.fromEntries(cards.map((card) => [card.id, 0])),
+  selectedCardId: null,
+  finished: false,
 }
 
 const app = document.querySelector('#app')
@@ -185,110 +106,96 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Quiz Drift Garage</p>
-        <h1>車種クイズでコインを集めて ドリフトしよう</h1>
+        <p class="eyebrow">Credit Card Game</p>
+        <h1>カードをえらんで ポイントをあつめよう</h1>
         <p class="intro">
-          車の車種クイズに正解するとコインを獲得。コインで車を買い、選んだ車でドリフト走行ができます。
+          架空のクレジットカードからその場に合う1枚を選ぶゲームです。<strong>お店の種類ごとに得意なカードが違います。</strong>
+          上手に選んでポイントを集め、使いすぎにも注意します。
         </p>
       </div>
       <div class="score-card">
         <div>
-          <span>コイン</span>
-          <strong id="coin-count">80</strong>
+          <span>ポイント</span>
+          <strong id="points">0</strong>
         </div>
         <div>
-          <span>所持台数</span>
-          <strong id="owned-count">1</strong>
+          <span>スター</span>
+          <strong id="stars">3</strong>
         </div>
         <div>
-          <span>ベスト</span>
-          <strong id="best-score">0</strong>
+          <span>ラウンド</span>
+          <strong id="round">1 / 6</strong>
         </div>
       </div>
     </section>
 
-    <section class="dashboard-grid">
-      <section class="panel quiz-panel">
+    <section class="main-grid">
+      <section class="panel scenario-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Car Quiz</p>
-            <h2 id="quiz-title">車種を当てよう</h2>
+            <p class="eyebrow">Shopping Scene</p>
+            <h2 id="scene-title">お買い物スタート</h2>
           </div>
-          <button id="next-quiz" class="action-button secondary" type="button">次のクイズ</button>
+          <button id="reset-button" class="action-button secondary" type="button">もう一度遊ぶ</button>
         </div>
-        <p id="question-text" class="question-text"></p>
-        <div id="answer-buttons" class="answer-grid"></div>
-        <p id="quiz-feedback" class="quiz-feedback">正解するとコインがもらえます。</p>
+
+        <div class="scene-box">
+          <p id="scene-category" class="scene-category">カテゴリー</p>
+          <p id="scene-description" class="scene-description"></p>
+          <p id="scene-amount" class="scene-amount">0円</p>
+        </div>
+
+        <p id="feedback" class="feedback">3枚の中から、いちばん向いているカードを選んでください。</p>
+        <button id="next-button" class="action-button primary" type="button">次の買い物へ</button>
       </section>
 
-      <section class="panel garage-panel">
+      <section class="panel cards-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Garage</p>
-            <h2>車を買う</h2>
+            <p class="eyebrow">Card Select</p>
+            <h2>カードを選ぶ</h2>
           </div>
-          <p id="selected-car" class="selected-car">選択中: Street One</p>
         </div>
-        <div id="garage-list" class="garage-list"></div>
+        <div id="cards-grid" class="cards-grid"></div>
       </section>
-    </section>
-
-    <section class="panel drift-panel">
-      <div class="panel-head">
-        <div>
-          <p class="eyebrow">Drift Run</p>
-          <h2 id="drift-car-name">Street Oneで走行中</h2>
-        </div>
-        <div class="drift-stats">
-          <span>スコア <strong id="drift-score">0</strong></span>
-          <span>コンボ <strong id="drift-chain">0</strong></span>
-        </div>
-      </div>
-      <canvas id="drift-canvas" class="drift-canvas" width="880" height="440" aria-label="ドリフトコース"></canvas>
-      <p id="drift-status" class="drift-status">アクセルで加速、左右で向きを変えよう。</p>
-      <p class="hint-text">操作: ↑ アクセル / ↓ ブレーキ / ← → ステア</p>
     </section>
 
     <section class="insight-grid">
       <article class="insight-card">
-        <p class="eyebrow">Shop Note</p>
-        <h3>購入のコツ</h3>
-        <p id="shop-note">最初は安い車で台数を増やし、次に速い車を狙うと遊びやすいです。</p>
+        <p class="eyebrow">Card Memo</p>
+        <h3>カードの特徴</h3>
+        <p id="card-memo">各カードに得意なお店があります。</p>
       </article>
+
       <article class="insight-card">
-        <p class="eyebrow">Car Data</p>
-        <h3>選択車の性能</h3>
-        <p id="car-specs"></p>
+        <p class="eyebrow">Usage</p>
+        <h3>今月の利用額</h3>
+        <div id="usage-list" class="usage-list"></div>
       </article>
+
       <article class="insight-card">
-        <p class="eyebrow">Log</p>
-        <h3>直近の結果</h3>
+        <p class="eyebrow">History</p>
+        <h3>プレーログ</h3>
         <ol id="history-list" class="history-list"></ol>
       </article>
     </section>
   </main>
 `
 
-const coinCountEl = document.querySelector('#coin-count')
-const ownedCountEl = document.querySelector('#owned-count')
-const bestScoreEl = document.querySelector('#best-score')
-const quizTitleEl = document.querySelector('#quiz-title')
-const questionTextEl = document.querySelector('#question-text')
-const answerButtonsEl = document.querySelector('#answer-buttons')
-const quizFeedbackEl = document.querySelector('#quiz-feedback')
-const nextQuizButton = document.querySelector('#next-quiz')
-const garageListEl = document.querySelector('#garage-list')
-const selectedCarEl = document.querySelector('#selected-car')
-const driftCanvas = document.querySelector('#drift-canvas')
-const driftCarNameEl = document.querySelector('#drift-car-name')
-const driftScoreEl = document.querySelector('#drift-score')
-const driftChainEl = document.querySelector('#drift-chain')
-const driftStatusEl = document.querySelector('#drift-status')
-const shopNoteEl = document.querySelector('#shop-note')
-const carSpecsEl = document.querySelector('#car-specs')
+const pointsEl = document.querySelector('#points')
+const starsEl = document.querySelector('#stars')
+const roundEl = document.querySelector('#round')
+const sceneTitleEl = document.querySelector('#scene-title')
+const sceneCategoryEl = document.querySelector('#scene-category')
+const sceneDescriptionEl = document.querySelector('#scene-description')
+const sceneAmountEl = document.querySelector('#scene-amount')
+const feedbackEl = document.querySelector('#feedback')
+const cardsGridEl = document.querySelector('#cards-grid')
+const cardMemoEl = document.querySelector('#card-memo')
+const usageListEl = document.querySelector('#usage-list')
 const historyListEl = document.querySelector('#history-list')
-
-const ctx = driftCanvas.getContext('2d')
+const nextButton = document.querySelector('#next-button')
+const resetButton = document.querySelector('#reset-button')
 
 function shuffleArray(items) {
   const next = [...items]
@@ -299,26 +206,23 @@ function shuffleArray(items) {
   return next
 }
 
-function getSelectedCar() {
-  return state.garage.find((car) => car.id === state.selectedCarId) ?? state.garage[0]
+function getCurrentScenario() {
+  return state.currentScenario
 }
 
-function refillQuizDeck() {
-  state.quizDeck = shuffleArray(quizBank)
+function getCardMultiplier(card, category) {
+  return card.bonus[category] ?? card.bonus.default
 }
 
-function setNextQuestion() {
-  if (state.quizDeck.length === 0) {
-    refillQuizDeck()
-  }
-
-  state.currentQuestion = state.quizDeck.shift()
-  state.answerResolved = false
+function getBestCard(category) {
+  return cards.reduce((best, card) =>
+    getCardMultiplier(card, category) > getCardMultiplier(best, category) ? card : best,
+  )
 }
 
 function addHistory(text) {
   state.history.unshift(text)
-  state.history = state.history.slice(0, 5)
+  state.history = state.history.slice(0, 6)
 }
 
 function renderHistory() {
@@ -327,277 +231,157 @@ function renderHistory() {
     : '<li>まだ記録はありません。</li>'
 }
 
-function renderQuiz() {
-  const question = state.currentQuestion
-  quizTitleEl.textContent = `${question.maker}の車種クイズ`
-  questionTextEl.textContent = question.question
-
-  answerButtonsEl.innerHTML = question.choices
-    .map((choice, index) => {
-      const classes = ['answer-button']
-      if (state.answerResolved && index === question.answerIndex) classes.push('correct')
-      const disabled = state.answerResolved ? 'disabled' : ''
-      return `<button class="${classes.join(' ')}" data-index="${index}" type="button" ${disabled}>${choice}</button>`
+function renderUsage() {
+  usageListEl.innerHTML = cards
+    .map((card) => {
+      const used = state.cardUsage[card.id]
+      const percent = Math.min(100, Math.round((used / card.limit) * 100))
+      return `
+        <div class="usage-item">
+          <div class="usage-head">
+            <span>${card.name}</span>
+            <span>${used} / ${card.limit}円</span>
+          </div>
+          <div class="usage-bar"><div class="usage-fill" style="width:${percent}%; background:${card.color};"></div></div>
+        </div>
+      `
     })
     .join('')
-
-  ;[...answerButtonsEl.querySelectorAll('.answer-button')].forEach((button) => {
-    button.addEventListener('click', () => answerQuestion(Number(button.dataset.index)))
-  })
 }
 
-function renderGarage() {
-  garageListEl.innerHTML = state.garage
-    .map((car) => {
-      const owned = car.owned ? 'owned' : ''
-      const selected = car.id === state.selectedCarId ? 'selected' : ''
-      const action = car.owned
-        ? `<button class="garage-action select" data-action="select" data-id="${car.id}" type="button">${selected ? '選択中' : 'この車に乗る'}</button>`
-        : `<button class="garage-action buy" data-action="buy" data-id="${car.id}" type="button">${car.price}コインで買う</button>`
+function renderCards() {
+  const scenario = getCurrentScenario()
 
+  cardsGridEl.innerHTML = cards
+    .map((card) => {
+      const selected = state.selectedCardId === card.id ? ' selected' : ''
+      const used = state.cardUsage[card.id]
+      const multiplier = scenario ? getCardMultiplier(card, scenario.category) : card.bonus.default
       return `
-        <article class="garage-item ${owned} ${selected}">
-          <div class="garage-swatch" style="background:${car.color}"></div>
-          <div class="garage-copy">
-            <h3>${car.name}</h3>
-            <p>${car.description}</p>
-            <p class="garage-stats">速さ ${car.speed.toFixed(2)} / 曲がり ${car.grip.toFixed(2)} / ドリフト ${car.drift.toFixed(2)}</p>
-          </div>
-          ${action}
-        </article>
+        <button class="credit-card${selected}" data-id="${card.id}" type="button" style="--card-color:${card.color};">
+          <span class="credit-name">${card.name}</span>
+          <span class="credit-theme">${card.theme}</span>
+          <span class="credit-multiplier">今回 ${multiplier.toFixed(1)} 倍</span>
+          <span class="credit-limit">利用 ${used} / ${card.limit}円</span>
+          <span class="credit-text">${card.text}</span>
+        </button>
       `
     })
     .join('')
 
-  ;[...garageListEl.querySelectorAll('.garage-action')].forEach((button) => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.id
-      if (button.dataset.action === 'buy') buyCar(id)
-      if (button.dataset.action === 'select') selectCar(id)
-    })
+  ;[...cardsGridEl.querySelectorAll('.credit-card')].forEach((button) => {
+    button.addEventListener('click', () => handleChoice(button.dataset.id))
   })
 }
 
-function renderHud() {
-  const selectedCar = getSelectedCar()
-  coinCountEl.textContent = String(state.coins)
-  ownedCountEl.textContent = String(state.garage.filter((car) => car.owned).length)
-  bestScoreEl.textContent = String(Math.round(state.bestScore))
-  selectedCarEl.textContent = `選択中: ${selectedCar.name}`
-  driftCarNameEl.textContent = `${selectedCar.name}で走行中`
-  driftScoreEl.textContent = String(Math.round(state.driftScore))
-  driftChainEl.textContent = String(Math.round(carState.driftChain))
-  driftStatusEl.textContent = state.driftStatus
-  carSpecsEl.textContent = `${selectedCar.name} / 速さ ${selectedCar.speed.toFixed(2)} / 加速 ${selectedCar.accel.toFixed(2)} / グリップ ${selectedCar.grip.toFixed(2)} / ドリフト適性 ${selectedCar.drift.toFixed(2)}`
-  shopNoteEl.textContent = selectedCar.drift > 1.2 ? '今の車はドリフト角度が作りやすいです。アクセルを残して滑らせると伸びます。' : '今の車は安定寄りです。大きく切りすぎず、出口でアクセルを踏むとつなぎやすいです。'
-  renderGarage()
-  renderHistory()
-}
+function renderScenario() {
+  const scenario = getCurrentScenario()
 
-function answerQuestion(index) {
-  if (state.answerResolved) return
-
-  const question = state.currentQuestion
-  state.answerResolved = true
-
-  if (index === question.answerIndex) {
-    state.coins += question.reward
-    quizFeedbackEl.textContent = `正解。${question.explanation} ${question.reward}コイン獲得。`
-    addHistory(`${question.model} に正解して ${question.reward} コイン獲得`)
-  } else {
-    const correct = question.choices[question.answerIndex]
-    quizFeedbackEl.textContent = `不正解。正解は ${correct}。${question.explanation}`
-    addHistory(`${question.model} を外した。正解は ${correct}`)
-  }
-
-  renderQuiz()
-  renderHud()
-}
-
-function buyCar(id) {
-  const car = state.garage.find((item) => item.id === id)
-  if (!car || car.owned) return
-  if (state.coins < car.price) {
-    quizFeedbackEl.textContent = `${car.name} を買うには ${car.price} コイン必要です。`
+  if (!scenario) {
+    sceneTitleEl.textContent = 'ゲーム終了'
+    sceneCategoryEl.textContent = 'おつかれさま'
+    sceneDescriptionEl.textContent = '6ラウンドが終わりました。もう一度遊ぶで新しい順番で挑戦できます。'
+    sceneAmountEl.textContent = `${state.points}ポイント`
+    feedbackEl.textContent =
+      state.stars >= 2
+        ? '上手にカードを使い分けられました。'
+        : '次はお店ごとの得意カードをもっと意識すると伸びます。'
+    nextButton.disabled = true
+    renderCards()
     return
   }
 
-  state.coins -= car.price
-  car.owned = true
-  state.selectedCarId = car.id
-  resetCarPosition()
-  addHistory(`${car.name} を購入してガレージに追加`)
+  sceneTitleEl.textContent = scenario.title
+  sceneCategoryEl.textContent = scenario.categoryLabel
+  sceneDescriptionEl.textContent = scenario.description
+  sceneAmountEl.textContent = `${scenario.amount.toLocaleString('ja-JP')}円`
+  nextButton.disabled = false
+  renderCards()
+}
+
+function renderHud() {
+  pointsEl.textContent = String(state.points)
+  starsEl.textContent = '★'.repeat(state.stars) || '0'
+  roundEl.textContent = `${Math.min(state.round, state.maxRounds)} / ${state.maxRounds}`
+  cardMemoEl.textContent = state.selectedCardId
+    ? `${cards.find((card) => card.id === state.selectedCardId)?.name} を選択中。カードごとの得意分野を見て選ぶと高得点です。`
+    : '各カードに得意なお店があります。'
+  renderUsage()
+  renderHistory()
+}
+
+function moveNextScenario() {
+  state.currentScenario = state.deck.shift() ?? null
+  state.selectedCardId = null
+  renderScenario()
   renderHud()
 }
 
-function selectCar(id) {
-  const car = state.garage.find((item) => item.id === id)
-  if (!car || !car.owned) return
-  state.selectedCarId = car.id
-  resetCarPosition()
-  addHistory(`${car.name} に乗り換えた`)
+function handleChoice(cardId) {
+  const scenario = getCurrentScenario()
+  if (!scenario || state.selectedCardId) {
+    return
+  }
+
+  const card = cards.find((item) => item.id === cardId)
+  if (!card) {
+    return
+  }
+
+  state.selectedCardId = cardId
+
+  const nextUsage = state.cardUsage[cardId] + scenario.amount
+  if (nextUsage > card.limit) {
+    state.stars = Math.max(0, state.stars - 1)
+    feedbackEl.textContent = `${card.name} は利用上限オーバーです。別ラウンドで気をつけよう。`
+    addHistory(`${scenario.title}: 上限オーバーでスターを1つ失った`)
+    renderCards()
+    renderHud()
+    return
+  }
+
+  state.cardUsage[cardId] = nextUsage
+  const bestCard = getBestCard(scenario.category)
+  const multiplier = getCardMultiplier(card, scenario.category)
+  const earnedPoints = Math.round((scenario.amount / 100) * multiplier)
+
+  state.points += earnedPoints
+
+  if (bestCard.id === cardId) {
+    feedbackEl.textContent = `大成功。${card.name} がぴったりで ${earnedPoints} ポイント獲得。`
+    addHistory(`${scenario.title}: ベストなカードで ${earnedPoints} ポイント`)
+  } else {
+    feedbackEl.textContent = `${earnedPoints} ポイント獲得。もっと良いのは ${bestCard.name} でした。`
+    addHistory(`${scenario.title}: ${card.name} を選んで ${earnedPoints} ポイント`)
+  }
+
+  renderCards()
   renderHud()
 }
 
-function resetCarPosition() {
-  carState.x = track.centerX
-  carState.y = track.centerY + 110
-  carState.angle = -Math.PI / 2
-  carState.velocityX = 0
-  carState.velocityY = 0
-  carState.driftChain = 0
-  state.driftScore = 0
-  state.driftStatus = '新しい車でコースイン。滑らせてみよう。'
+function nextRound() {
+  if (!state.currentScenario) {
+    return
+  }
+
+  state.round += 1
+  moveNextScenario()
 }
 
-function drawTrack() {
-  ctx.clearRect(0, 0, driftCanvas.width, driftCanvas.height)
-  ctx.fillStyle = '#1f2937'
-  ctx.fillRect(0, 0, driftCanvas.width, driftCanvas.height)
-
-  ctx.fillStyle = '#14532d'
-  ctx.beginPath()
-  ctx.ellipse(track.centerX, track.centerY, track.outerRx, track.outerRy, 0, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.fillStyle = '#374151'
-  ctx.beginPath()
-  ctx.ellipse(track.centerX, track.centerY, track.outerRx - 16, track.outerRy - 16, 0, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.fillStyle = '#166534'
-  ctx.beginPath()
-  ctx.ellipse(track.centerX, track.centerY, track.innerRx, track.innerRy, 0, 0, Math.PI * 2)
-  ctx.fill()
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.65)'
-  ctx.lineWidth = 3
-  ctx.setLineDash([10, 10])
-  ctx.beginPath()
-  ctx.ellipse(track.centerX, track.centerY, (track.outerRx + track.innerRx) / 2, (track.outerRy + track.innerRy) / 2, 0, 0, Math.PI * 2)
-  ctx.stroke()
-  ctx.setLineDash([])
+function resetGame() {
+  state.round = 1
+  state.points = 0
+  state.stars = 3
+  state.deck = shuffleArray(scenarios)
+  state.history = []
+  state.cardUsage = Object.fromEntries(cards.map((card) => [card.id, 0]))
+  state.selectedCardId = null
+  state.finished = false
+  feedbackEl.textContent = '3枚の中から、いちばん向いているカードを選んでください。'
+  moveNextScenario()
 }
 
-function drawCar() {
-  const car = getSelectedCar()
-  ctx.save()
-  ctx.translate(carState.x, carState.y)
-  ctx.rotate(carState.angle)
-  ctx.fillStyle = car.color
-  ctx.fillRect(-18, -10, 36, 20)
-  ctx.fillStyle = '#111827'
-  ctx.fillRect(-12, -7, 24, 14)
-  ctx.restore()
-}
+nextButton.addEventListener('click', nextRound)
+resetButton.addEventListener('click', resetGame)
 
-function distanceToIdealLane(x, y) {
-  const dx = x - track.centerX
-  const dy = y - track.centerY
-  const outer = (dx * dx) / (track.outerRx * track.outerRx) + (dy * dy) / (track.outerRy * track.outerRy)
-  const inner = (dx * dx) / (track.innerRx * track.innerRx) + (dy * dy) / (track.innerRy * track.innerRy)
-  return { outer, inner }
-}
-
-function updateCarPhysics() {
-  const car = getSelectedCar()
-  const forwardX = Math.cos(carState.angle)
-  const forwardY = Math.sin(carState.angle)
-  const speed = Math.hypot(carState.velocityX, carState.velocityY)
-
-  if (input.up) {
-    carState.velocityX += forwardX * car.accel
-    carState.velocityY += forwardY * car.accel
-  }
-
-  if (input.down) {
-    carState.velocityX *= 0.96
-    carState.velocityY *= 0.96
-  }
-
-  if (input.left) {
-    carState.angle -= 0.04 + speed * 0.007
-  }
-
-  if (input.right) {
-    carState.angle += 0.04 + speed * 0.007
-  }
-
-  const sideX = -forwardY
-  const sideY = forwardX
-  const lateral = carState.velocityX * sideX + carState.velocityY * sideY
-  const forward = carState.velocityX * forwardX + carState.velocityY * forwardY
-
-  const adjustedLateral = lateral * car.grip
-  carState.velocityX = forward * forwardX + adjustedLateral * sideX
-  carState.velocityY = forward * forwardY + adjustedLateral * sideY
-
-  const currentSpeed = Math.hypot(carState.velocityX, carState.velocityY)
-  const maxSpeed = car.speed
-  if (currentSpeed > maxSpeed) {
-    carState.velocityX = (carState.velocityX / currentSpeed) * maxSpeed
-    carState.velocityY = (carState.velocityY / currentSpeed) * maxSpeed
-  }
-
-  carState.velocityX *= 0.992
-  carState.velocityY *= 0.992
-  carState.x += carState.velocityX
-  carState.y += carState.velocityY
-
-  const lane = distanceToIdealLane(carState.x, carState.y)
-  const onTrack = lane.outer < 1 && lane.inner > 1
-
-  if (!onTrack) {
-    carState.velocityX *= 0.95
-    carState.velocityY *= 0.95
-    state.driftStatus = 'コース外にふくらんだ。戻して立て直そう。'
-    carState.driftChain = 0
-  }
-
-  const driftPower = Math.abs(lateral) * 18 * car.drift
-  if (onTrack && currentSpeed > 1.3 && driftPower > 6 && (input.left || input.right)) {
-    carState.driftChain += 0.4
-    state.driftScore += driftPower * 0.18 + carState.driftChain * 0.03
-    state.driftStatus = `ドリフト中。角度を保ってスコアを伸ばそう。`
-  } else if (carState.driftChain > 0) {
-    state.driftStatus = 'ドリフトをつなぎ直そう。'
-    carState.driftChain = Math.max(0, carState.driftChain - 0.25)
-  }
-
-  state.bestScore = Math.max(state.bestScore, state.driftScore)
-}
-
-function loop() {
-  drawTrack()
-  updateCarPhysics()
-  drawCar()
-  renderHud()
-  requestAnimationFrame(loop)
-}
-
-document.addEventListener('keydown', (event) => {
-  if (event.code === 'ArrowUp') input.up = true
-  if (event.code === 'ArrowDown') input.down = true
-  if (event.code === 'ArrowLeft') input.left = true
-  if (event.code === 'ArrowRight') input.right = true
-})
-
-document.addEventListener('keyup', (event) => {
-  if (event.code === 'ArrowUp') input.up = false
-  if (event.code === 'ArrowDown') input.down = false
-  if (event.code === 'ArrowLeft') input.left = false
-  if (event.code === 'ArrowRight') input.right = false
-})
-
-nextQuizButton.addEventListener('click', () => {
-  setNextQuestion()
-  quizFeedbackEl.textContent = '正解するとコインがもらえます。'
-  renderQuiz()
-})
-
-refillQuizDeck()
-setNextQuestion()
-renderQuiz()
-renderHud()
-resetCarPosition()
-loop()
+resetGame()
