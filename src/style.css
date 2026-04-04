@@ -1,9 +1,7 @@
 ﻿:root {
   font-family: Georgia, 'Times New Roman', serif;
   color: #f6f0de;
-  background:
-    radial-gradient(circle at top, rgba(255, 228, 163, 0.2), transparent 30%),
-    linear-gradient(180deg, #0f3d2e 0%, #0a241c 100%);
+  background: #000;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -30,6 +28,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  background: #000;
 }
 
 button,
@@ -313,15 +312,20 @@ h1 {
   background: rgba(255, 255, 255, 0.95);
 }
 
+.stadium-actions,
 .control-row,
 .insight-grid {
   display: grid;
   gap: 16px;
+}
+
+.stadium-actions,
+.insight-grid {
   margin-top: 18px;
 }
 
 .control-row {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
 }
 
 .control-box p:last-child,
@@ -335,7 +339,6 @@ h1 {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
-  margin-top: 18px;
 }
 
 .action-button {
