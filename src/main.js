@@ -1,103 +1,29 @@
 import './style.css'
 
-const cards = [
-  {
-    id: 'orange-cash',
-    name: 'Orange Cash',
-    theme: 'キャッシュバック',
-    limit: 22000,
-    color: '#fb923c',
-    bonus: {
-      supermarket: 2.2,
-      convenience: 1.8,
-      default: 1.1,
-    },
-    text: 'スーパーとコンビニでポイントが伸びる使いやすいカード。',
-  },
-  {
-    id: 'sky-miles',
-    name: 'Sky Miles',
-    theme: 'トラベル',
-    limit: 26000,
-    color: '#38bdf8',
-    bonus: {
-      train: 2.4,
-      travel: 2.8,
-      default: 1,
-    },
-    text: '電車や旅行の支払いに強い空色カード。',
-  },
-  {
-    id: 'green-family',
-    name: 'Green Family',
-    theme: 'まいにち',
-    limit: 18000,
-    color: '#4ade80',
-    bonus: {
-      online: 2.3,
-      bookstore: 1.9,
-      default: 1.4,
-    },
-    text: 'ネット注文や本の買い物が得意な安定カード。',
-  },
-]
-
-const scenarios = [
-  {
-    title: '放課後のおやつ',
-    category: 'convenience',
-    categoryLabel: 'コンビニ',
-    amount: 780,
-    description: '飲み物とおやつを買うことにした。',
-  },
-  {
-    title: '家族の買い出し',
-    category: 'supermarket',
-    categoryLabel: 'スーパー',
-    amount: 4200,
-    description: '週末の食材をまとめて買う。',
-  },
-  {
-    title: '遠足の切符',
-    category: 'train',
-    categoryLabel: '電車',
-    amount: 1650,
-    description: '電車で科学館へ行くための切符代。',
-  },
-  {
-    title: '図鑑を注文',
-    category: 'online',
-    categoryLabel: 'ネットショップ',
-    amount: 3200,
-    description: '宇宙の図鑑をネットで注文する。',
-  },
-  {
-    title: '旅行のホテル',
-    category: 'travel',
-    categoryLabel: '旅行',
-    amount: 9800,
-    description: '家族旅行のホテルを予約する。',
-  },
-  {
-    title: '新しい本を買う',
-    category: 'bookstore',
-    categoryLabel: '本屋',
-    amount: 1800,
-    description: '好きなシリーズの新刊が出た。',
-  },
-]
+const machine = {
+  width: 900,
+  height: 480,
+  railY: 62,
+  leftBarX: 250,
+  rightBarX: 610,
+  barY: 300,
+  barWidth: 120,
+  barHeight: 12,
+  goalY: 420,
+}
 
 const state = {
-  round: 1,
-  maxRounds: scenarios.length,
-  currentScenario: null,
-  points: 0,
-  stars: 3,
-  deck: [],
-  history: [],
-  cardUsage: Object.fromEntries(cards.map((card) => [card.id, 0])),
-  selectedCardId: null,
-  finished: false,
+  coins: 5,
+  plays: 0,
+  wins: 0,
+  armX: 430,
+  armY: machine.railY,
+  dropping: false,
+  rising: false,
+  movingLeft: false,
+  movingRight: false,
+  status: '左右に動かして、狙った位置でアームを下ろそう。',
+  box: {},
 }
 
 const app = document.querySelector('#app')
@@ -106,75 +32,80 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Credit Card Game</p>
-        <h1>カードをえらんで ポイントをあつめよう</h1>
+        <p class="eyebrow">Bridge Crane</p>
+        <h1>橋渡しのクレーンゲーム</h1>
         <p class="intro">
-          架空のクレジットカードからその場に合う1枚を選ぶゲームです。<strong>お店の種類ごとに得意なカードが違います。</strong>
-          上手に選んでポイントを集め、使いすぎにも注意します。
+          箱を2本バーの上で少しずつずらし、落として景品口へ入れる橋渡しゲームです。
+          <strong>アームは左右移動して、タイミングよく下降させます。</strong>
         </p>
       </div>
       <div class="score-card">
         <div>
-          <span>ポイント</span>
-          <strong id="points">0</strong>
+          <span>コイン</span>
+          <strong id="coin-count">5</strong>
         </div>
         <div>
-          <span>スター</span>
-          <strong id="stars">3</strong>
+          <span>プレイ</span>
+          <strong id="play-count">0</strong>
         </div>
         <div>
-          <span>ラウンド</span>
-          <strong id="round">1 / 6</strong>
+          <span>成功</span>
+          <strong id="win-count">0</strong>
         </div>
       </div>
     </section>
 
     <section class="main-grid">
-      <section class="panel scenario-panel">
+      <section class="panel machine-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Shopping Scene</p>
-            <h2 id="scene-title">お買い物スタート</h2>
+            <p class="eyebrow">Machine</p>
+            <h2>橋渡しステージ</h2>
           </div>
-          <button id="reset-button" class="action-button secondary" type="button">もう一度遊ぶ</button>
+          <button id="drop-button" class="action-button primary" type="button">アームを下ろす</button>
         </div>
-
-        <div class="scene-box">
-          <p id="scene-category" class="scene-category">カテゴリー</p>
-          <p id="scene-description" class="scene-description"></p>
-          <p id="scene-amount" class="scene-amount">0円</p>
-        </div>
-
-        <p id="feedback" class="feedback">3枚の中から、いちばん向いているカードを選んでください。</p>
-        <button id="next-button" class="action-button primary" type="button">次の買い物へ</button>
+        <canvas id="game-canvas" class="game-canvas" width="900" height="480" aria-label="橋渡しクレーンゲーム"></canvas>
+        <p id="status-text" class="status-text">左右に動かして、狙った位置でアームを下ろそう。</p>
       </section>
 
-      <section class="panel cards-panel">
+      <section class="panel control-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Card Select</p>
-            <h2>カードを選ぶ</h2>
+            <p class="eyebrow">Controls</p>
+            <h2>操作</h2>
           </div>
         </div>
-        <div id="cards-grid" class="cards-grid"></div>
+
+        <div class="control-grid">
+          <button id="left-button" class="action-button secondary" type="button">← 左へ</button>
+          <button id="drop-side-button" class="action-button primary" type="button">↓ 下ろす</button>
+          <button id="right-button" class="action-button secondary" type="button">右へ →</button>
+        </div>
+
+        <div class="tip-card">
+          <p class="eyebrow">Tips</p>
+          <p>箱の左か右の角を押すと、少し回転しながら前に進みます。</p>
+          <p>バーの端まで運ぶと、箱が傾いて落ちやすくなります。</p>
+          <p>操作キーは ← → Space でも使えます。</p>
+        </div>
+
+        <button id="reset-button" class="action-button secondary" type="button">箱を置き直す</button>
       </section>
     </section>
 
     <section class="insight-grid">
       <article class="insight-card">
-        <p class="eyebrow">Card Memo</p>
-        <h3>カードの特徴</h3>
-        <p id="card-memo">各カードに得意なお店があります。</p>
+        <p class="eyebrow">Prize Box</p>
+        <h3>箱の状態</h3>
+        <p id="box-state"></p>
       </article>
-
       <article class="insight-card">
-        <p class="eyebrow">Usage</p>
-        <h3>今月の利用額</h3>
-        <div id="usage-list" class="usage-list"></div>
+        <p class="eyebrow">Machine Memo</p>
+        <h3>攻略メモ</h3>
+        <p id="memo-text">最初は中心より少し右か左を押して角度をつけると動かしやすいです。</p>
       </article>
-
       <article class="insight-card">
-        <p class="eyebrow">History</p>
+        <p class="eyebrow">Log</p>
         <h3>プレーログ</h3>
         <ol id="history-list" class="history-list"></ol>
       </article>
@@ -182,206 +113,264 @@ app.innerHTML = `
   </main>
 `
 
-const pointsEl = document.querySelector('#points')
-const starsEl = document.querySelector('#stars')
-const roundEl = document.querySelector('#round')
-const sceneTitleEl = document.querySelector('#scene-title')
-const sceneCategoryEl = document.querySelector('#scene-category')
-const sceneDescriptionEl = document.querySelector('#scene-description')
-const sceneAmountEl = document.querySelector('#scene-amount')
-const feedbackEl = document.querySelector('#feedback')
-const cardsGridEl = document.querySelector('#cards-grid')
-const cardMemoEl = document.querySelector('#card-memo')
-const usageListEl = document.querySelector('#usage-list')
+const coinCountEl = document.querySelector('#coin-count')
+const playCountEl = document.querySelector('#play-count')
+const winCountEl = document.querySelector('#win-count')
+const statusTextEl = document.querySelector('#status-text')
+const boxStateEl = document.querySelector('#box-state')
+const memoTextEl = document.querySelector('#memo-text')
 const historyListEl = document.querySelector('#history-list')
-const nextButton = document.querySelector('#next-button')
+const dropButton = document.querySelector('#drop-button')
+const dropSideButton = document.querySelector('#drop-side-button')
+const leftButton = document.querySelector('#left-button')
+const rightButton = document.querySelector('#right-button')
 const resetButton = document.querySelector('#reset-button')
+const canvas = document.querySelector('#game-canvas')
+const ctx = canvas.getContext('2d')
 
-function shuffleArray(items) {
-  const next = [...items]
-  for (let index = next.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1))
-    ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
+function createBox() {
+  return {
+    x: 430,
+    y: 264,
+    width: 144,
+    height: 42,
+    angle: 0.06,
+    falling: false,
+    vx: 0,
+    vy: 0,
+    settled: true,
+    won: false,
   }
-  return next
 }
 
-function getCurrentScenario() {
-  return state.currentScenario
-}
-
-function getCardMultiplier(card, category) {
-  return card.bonus[category] ?? card.bonus.default
-}
-
-function getBestCard(category) {
-  return cards.reduce((best, card) =>
-    getCardMultiplier(card, category) > getCardMultiplier(best, category) ? card : best,
-  )
+function resetPrizeBox() {
+  state.box = createBox()
+  state.armX = 430
+  state.armY = machine.railY
+  state.dropping = false
+  state.rising = false
+  state.status = '箱の端を押して、少しずつ前へ送ろう。'
+  memoTextEl.textContent = '最初は中心より少し右か左を押して角度をつけると動かしやすいです。'
 }
 
 function addHistory(text) {
-  state.history.unshift(text)
-  state.history = state.history.slice(0, 6)
-}
-
-function renderHistory() {
+  state.history = [text, ...(state.history ?? [])].slice(0, 6)
   historyListEl.innerHTML = state.history.length
     ? state.history.map((entry) => `<li>${entry}</li>`).join('')
-    : '<li>まだ記録はありません。</li>'
+    : '<li>まだプレイ記録はありません。</li>'
 }
 
-function renderUsage() {
-  usageListEl.innerHTML = cards
-    .map((card) => {
-      const used = state.cardUsage[card.id]
-      const percent = Math.min(100, Math.round((used / card.limit) * 100))
-      return `
-        <div class="usage-item">
-          <div class="usage-head">
-            <span>${card.name}</span>
-            <span>${used} / ${card.limit}円</span>
-          </div>
-          <div class="usage-bar"><div class="usage-fill" style="width:${percent}%; background:${card.color};"></div></div>
-        </div>
-      `
-    })
-    .join('')
-}
-
-function renderCards() {
-  const scenario = getCurrentScenario()
-
-  cardsGridEl.innerHTML = cards
-    .map((card) => {
-      const selected = state.selectedCardId === card.id ? ' selected' : ''
-      const used = state.cardUsage[card.id]
-      const multiplier = scenario ? getCardMultiplier(card, scenario.category) : card.bonus.default
-      return `
-        <button class="credit-card${selected}" data-id="${card.id}" type="button" style="--card-color:${card.color};">
-          <span class="credit-name">${card.name}</span>
-          <span class="credit-theme">${card.theme}</span>
-          <span class="credit-multiplier">今回 ${multiplier.toFixed(1)} 倍</span>
-          <span class="credit-limit">利用 ${used} / ${card.limit}円</span>
-          <span class="credit-text">${card.text}</span>
-        </button>
-      `
-    })
-    .join('')
-
-  ;[...cardsGridEl.querySelectorAll('.credit-card')].forEach((button) => {
-    button.addEventListener('click', () => handleChoice(button.dataset.id))
-  })
-}
-
-function renderScenario() {
-  const scenario = getCurrentScenario()
-
-  if (!scenario) {
-    sceneTitleEl.textContent = 'ゲーム終了'
-    sceneCategoryEl.textContent = 'おつかれさま'
-    sceneDescriptionEl.textContent = '6ラウンドが終わりました。もう一度遊ぶで新しい順番で挑戦できます。'
-    sceneAmountEl.textContent = `${state.points}ポイント`
-    feedbackEl.textContent =
-      state.stars >= 2
-        ? '上手にカードを使い分けられました。'
-        : '次はお店ごとの得意カードをもっと意識すると伸びます。'
-    nextButton.disabled = true
-    renderCards()
-    return
-  }
-
-  sceneTitleEl.textContent = scenario.title
-  sceneCategoryEl.textContent = scenario.categoryLabel
-  sceneDescriptionEl.textContent = scenario.description
-  sceneAmountEl.textContent = `${scenario.amount.toLocaleString('ja-JP')}円`
-  nextButton.disabled = false
-  renderCards()
-}
+state.history = []
 
 function renderHud() {
-  pointsEl.textContent = String(state.points)
-  starsEl.textContent = '★'.repeat(state.stars) || '0'
-  roundEl.textContent = `${Math.min(state.round, state.maxRounds)} / ${state.maxRounds}`
-  cardMemoEl.textContent = state.selectedCardId
-    ? `${cards.find((card) => card.id === state.selectedCardId)?.name} を選択中。カードごとの得意分野を見て選ぶと高得点です。`
-    : '各カードに得意なお店があります。'
-  renderUsage()
-  renderHistory()
+  coinCountEl.textContent = String(state.coins)
+  playCountEl.textContent = String(state.plays)
+  winCountEl.textContent = String(state.wins)
+  statusTextEl.textContent = state.status
+  boxStateEl.textContent = state.box.won
+    ? '景品口に落ちた。成功です。'
+    : state.box.falling
+      ? '箱が落下中。位置を見守ろう。'
+      : `箱の角度 ${(state.box.angle * 57.3).toFixed(1)}° / 横位置 ${Math.round(state.box.x)}`
 }
 
-function moveNextScenario() {
-  state.currentScenario = state.deck.shift() ?? null
-  state.selectedCardId = null
-  renderScenario()
-  renderHud()
+function drawRoundedRect(x, y, width, height, radius) {
+  ctx.beginPath()
+  ctx.moveTo(x + radius, y)
+  ctx.lineTo(x + width - radius, y)
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+  ctx.lineTo(x + width, y + height - radius)
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+  ctx.lineTo(x + radius, y + height)
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+  ctx.lineTo(x, y + radius)
+  ctx.quadraticCurveTo(x, y, x + radius, y)
+  ctx.closePath()
 }
 
-function handleChoice(cardId) {
-  const scenario = getCurrentScenario()
-  if (!scenario || state.selectedCardId) {
+function drawMachine() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  ctx.fillStyle = '#dbeafe'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.fillStyle = '#cbd5e1'
+  ctx.fillRect(40, 24, 820, 24)
+
+  ctx.fillStyle = '#94a3b8'
+  ctx.fillRect(60, 48, 18, 360)
+  ctx.fillRect(822, 48, 18, 360)
+
+  ctx.fillStyle = '#334155'
+  ctx.fillRect(machine.leftBarX, machine.barY, machine.barWidth, machine.barHeight)
+  ctx.fillRect(machine.rightBarX, machine.barY, machine.barWidth, machine.barHeight)
+
+  ctx.fillStyle = '#0f172a'
+  ctx.fillRect(388, machine.goalY, 124, 22)
+  ctx.fillStyle = '#f59e0b'
+  ctx.fillRect(388, machine.goalY + 22, 124, 20)
+
+  ctx.strokeStyle = '#475569'
+  ctx.lineWidth = 4
+  ctx.beginPath()
+  ctx.moveTo(state.armX, machine.railY)
+  ctx.lineTo(state.armX, state.armY)
+  ctx.stroke()
+
+  ctx.fillStyle = '#e2e8f0'
+  ctx.fillRect(state.armX - 26, state.armY, 12, 52)
+  ctx.fillRect(state.armX + 14, state.armY, 12, 52)
+  ctx.fillStyle = '#94a3b8'
+  ctx.fillRect(state.armX - 16, state.armY + 44, 14, 10)
+  ctx.fillRect(state.armX + 2, state.armY + 44, 14, 10)
+}
+
+function drawPrizeBox() {
+  const box = state.box
+  ctx.save()
+  ctx.translate(box.x, box.y)
+  ctx.rotate(box.angle)
+  ctx.fillStyle = '#f97316'
+  drawRoundedRect(-box.width / 2, -box.height / 2, box.width, box.height, 10)
+  ctx.fill()
+  ctx.fillStyle = '#fdba74'
+  ctx.fillRect(-12, -box.height / 2, 24, box.height)
+  ctx.restore()
+}
+
+function startDrop() {
+  if (state.dropping || state.rising || state.box.won || state.coins <= 0) {
     return
   }
 
-  const card = cards.find((item) => item.id === cardId)
-  if (!card) {
+  state.coins -= 1
+  state.plays += 1
+  state.dropping = true
+  state.status = 'アーム下降中。箱に当たる位置を見よう。'
+  addHistory(`プレイ ${state.plays} 回目: アームを下降`)
+}
+
+function nudgeBox() {
+  const box = state.box
+  const horizontalOffset = state.armX - box.x
+  if (Math.abs(horizontalOffset) > box.width / 2 + 18) {
+    state.status = '箱に届かなかった。位置を少しずらして再挑戦。'
+    memoTextEl.textContent = '中心から外しすぎると箱に当たりません。'
     return
   }
 
-  state.selectedCardId = cardId
+  const force = horizontalOffset > 0 ? 1 : -1
+  const edgeHit = Math.abs(horizontalOffset) / (box.width / 2)
+  box.x += force * (12 + edgeHit * 18)
+  box.angle += force * (0.05 + edgeHit * 0.06)
+  box.angle = Math.max(-0.55, Math.min(0.55, box.angle))
 
-  const nextUsage = state.cardUsage[cardId] + scenario.amount
-  if (nextUsage > card.limit) {
-    state.stars = Math.max(0, state.stars - 1)
-    feedbackEl.textContent = `${card.name} は利用上限オーバーです。別ラウンドで気をつけよう。`
-    addHistory(`${scenario.title}: 上限オーバーでスターを1つ失った`)
-    renderCards()
-    renderHud()
-    return
-  }
-
-  state.cardUsage[cardId] = nextUsage
-  const bestCard = getBestCard(scenario.category)
-  const multiplier = getCardMultiplier(card, scenario.category)
-  const earnedPoints = Math.round((scenario.amount / 100) * multiplier)
-
-  state.points += earnedPoints
-
-  if (bestCard.id === cardId) {
-    feedbackEl.textContent = `大成功。${card.name} がぴったりで ${earnedPoints} ポイント獲得。`
-    addHistory(`${scenario.title}: ベストなカードで ${earnedPoints} ポイント`)
+  if (box.x + box.width / 2 < machine.rightBarX + 26 && box.x - box.width / 2 > machine.leftBarX + machine.barWidth - 26) {
+    box.falling = true
+    box.vx = force * (1.4 + edgeHit)
+    box.vy = 2.2
+    box.settled = false
+    state.status = '箱が橋から外れて落下し始めた。'
+    memoTextEl.textContent = 'このまま景品口の上まで落ちれば成功です。'
   } else {
-    feedbackEl.textContent = `${earnedPoints} ポイント獲得。もっと良いのは ${bestCard.name} でした。`
-    addHistory(`${scenario.title}: ${card.name} を選んで ${earnedPoints} ポイント`)
+    state.status = edgeHit > 0.55 ? '箱の角を押して前に進んだ。もう一度同じ側を狙えます。' : '箱の中心寄りに当たった。次はもっと端を狙うと動きます。'
+    memoTextEl.textContent = '端を押すほど回転して前に進みやすくなります。'
   }
-
-  renderCards()
-  renderHud()
 }
 
-function nextRound() {
-  if (!state.currentScenario) {
+function updateArm() {
+  if (!state.dropping && !state.rising) {
+    if (state.movingLeft) state.armX = Math.max(120, state.armX - 4)
+    if (state.movingRight) state.armX = Math.min(780, state.armX + 4)
     return
   }
 
-  state.round += 1
-  moveNextScenario()
+  if (state.dropping) {
+    state.armY += 8
+    if (state.armY >= state.box.y - 56) {
+      nudgeBox()
+      state.dropping = false
+      state.rising = true
+    }
+  } else if (state.rising) {
+    state.armY -= 10
+    if (state.armY <= machine.railY) {
+      state.armY = machine.railY
+      state.rising = false
+    }
+  }
 }
 
-function resetGame() {
-  state.round = 1
-  state.points = 0
-  state.stars = 3
-  state.deck = shuffleArray(scenarios)
-  state.history = []
-  state.cardUsage = Object.fromEntries(cards.map((card) => [card.id, 0]))
-  state.selectedCardId = null
-  state.finished = false
-  feedbackEl.textContent = '3枚の中から、いちばん向いているカードを選んでください。'
-  moveNextScenario()
+function updateBox() {
+  const box = state.box
+  if (!box.falling) {
+    return
+  }
+
+  box.x += box.vx
+  box.y += box.vy
+  box.vy += 0.18
+  box.angle += box.vx * 0.012
+
+  if (box.y >= machine.goalY + 44) {
+    if (box.x > 390 && box.x < 510) {
+      box.won = true
+      box.falling = false
+      state.wins += 1
+      state.status = '成功。景品口に落ちた。'
+      addHistory(`プレイ ${state.plays} 回目: 景品ゲット成功`)
+      memoTextEl.textContent = '角度をつけてバーの端まで送れたのが勝因です。'
+    } else {
+      box.falling = false
+      state.status = '惜しい。景品口の外へ落ちた。'
+      addHistory(`プレイ ${state.plays} 回目: 落下したが外れ`)
+      memoTextEl.textContent = '箱をもう少し中央へ寄せて落とすと成功しやすいです。'
+    }
+  }
 }
 
-nextButton.addEventListener('click', nextRound)
-resetButton.addEventListener('click', resetGame)
+function gameLoop() {
+  updateArm()
+  updateBox()
+  drawMachine()
+  drawPrizeBox()
+  renderHud()
+  requestAnimationFrame(gameLoop)
+}
 
-resetGame()
+function setMove(direction, pressed) {
+  if (direction === 'left') state.movingLeft = pressed
+  if (direction === 'right') state.movingRight = pressed
+}
+
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'ArrowLeft') setMove('left', true)
+  if (event.code === 'ArrowRight') setMove('right', true)
+  if (event.code === 'Space') {
+    event.preventDefault()
+    startDrop()
+  }
+})
+
+document.addEventListener('keyup', (event) => {
+  if (event.code === 'ArrowLeft') setMove('left', false)
+  if (event.code === 'ArrowRight') setMove('right', false)
+})
+
+leftButton.addEventListener('pointerdown', () => setMove('left', true))
+leftButton.addEventListener('pointerup', () => setMove('left', false))
+leftButton.addEventListener('pointerleave', () => setMove('left', false))
+rightButton.addEventListener('pointerdown', () => setMove('right', true))
+rightButton.addEventListener('pointerup', () => setMove('right', false))
+rightButton.addEventListener('pointerleave', () => setMove('right', false))
+dropButton.addEventListener('click', startDrop)
+dropSideButton.addEventListener('click', startDrop)
+resetButton.addEventListener('click', () => {
+  resetPrizeBox()
+  addHistory('箱を置き直した')
+})
+
+historyListEl.innerHTML = '<li>まだプレイ記録はありません。</li>'
+resetPrizeBox()
+renderHud()
+gameLoop()
