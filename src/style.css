@@ -282,7 +282,7 @@ h1 {
 .ball {
   position: absolute;
   left: 50%;
-  top: 92%;
+  top: 95%;
   width: 30px;
   height: 30px;
   transform: translate(-50%, -50%);

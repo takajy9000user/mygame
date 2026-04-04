@@ -299,7 +299,7 @@ function renderHistory() {
 
 function resetActors() {
   ballEl.style.left = '50%'
-  ballEl.style.top = '92%'
+  ballEl.style.top = '95%'
   ballEl.style.width = '30px'
   ballEl.style.height = '30px'
   ballEl.classList.remove('shot')
