@@ -300,8 +300,8 @@ function renderHistory() {
 function resetActors() {
   ballEl.style.left = '50%'
   ballEl.style.top = '92%'
-  ballEl.style.width = '22px'
-  ballEl.style.height = '22px'
+  ballEl.style.width = '30px'
+  ballEl.style.height = '30px'
   ballEl.classList.remove('shot')
   keeperEl.style.left = '50%'
   keeperEl.style.top = '56%'
@@ -331,8 +331,8 @@ function moveBall(zone) {
   ballEl.classList.add('shot')
   ballEl.style.left = `${zone.x}%`
   ballEl.style.top = `${zone.y}%`
-  ballEl.style.width = '12px'
-  ballEl.style.height = '12px'
+  ballEl.style.width = '18px'
+  ballEl.style.height = '18px'
 }
 
 function finishMatchIfNeeded() {
