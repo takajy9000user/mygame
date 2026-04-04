@@ -1,9 +1,9 @@
 ﻿:root {
   font-family: 'Trebuchet MS', 'Hiragino Kaku Gothic ProN', sans-serif;
   color: #eff6ff;
-  background: #090d17;
-  --panel: rgba(11, 17, 31, 0.92);
-  --panel-soft: rgba(22, 31, 52, 0.94);
+  background: #0b1020;
+  --panel: rgba(12, 18, 34, 0.92);
+  --panel-soft: rgba(24, 34, 58, 0.94);
   --line: rgba(148, 163, 184, 0.18);
   --accent: #f97316;
   --text-soft: #cbd5e1;
@@ -16,9 +16,9 @@ body {
   height: 100%;
   overflow: hidden;
   background:
-    radial-gradient(circle at top, rgba(249, 115, 22, 0.16), transparent 24%),
+    radial-gradient(circle at top, rgba(249, 115, 22, 0.14), transparent 24%),
     radial-gradient(circle at bottom, rgba(96, 165, 250, 0.12), transparent 26%),
-    linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    linear-gradient(180deg, #111827 0%, #020617 100%);
 }
 button { font: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 #app { height: 100dvh; overflow: hidden; }
@@ -29,7 +29,7 @@ button { font: inherit; -webkit-tap-highlight-color: transparent; touch-action: 
   margin: 0 auto;
   padding: 18px 0;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   gap: 18px;
   overflow: hidden;
 }
@@ -63,7 +63,7 @@ h1 {
   max-width: 11ch;
 }
 
-.intro, .state-text, .battle-status, .skill-card p, .insight-card p:last-child, .history-list li {
+.intro, .state-text, .battle-status, .skill-card p, .quiz-feedback, .insight-card p:last-child, .history-list li {
   color: var(--text-soft);
   line-height: 1.6;
 }
@@ -99,7 +99,7 @@ h1 {
   min-height: 0;
 }
 
-.main-grid { grid-template-columns: 1.08fr 0.92fr; }
+.main-grid { grid-template-columns: 1.06fr 0.94fr; }
 .insight-grid { grid-template-columns: repeat(3, 1fr); }
 
 .panel {
@@ -115,7 +115,7 @@ h1 {
   gap: 12px;
 }
 
-.arena {
+.stick-arena {
   display: grid;
   grid-template-columns: 1fr 180px 1fr;
   gap: 18px;
@@ -124,31 +124,66 @@ h1 {
   padding: 20px;
   border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(51, 65, 85, 0.4), rgba(15, 23, 42, 0.92)),
+    linear-gradient(180deg, rgba(51, 65, 85, 0.35), rgba(15, 23, 42, 0.9)),
     var(--panel-soft);
 }
 
-.fighter {
+.fighter-card {
   padding: 18px;
   border-radius: 22px;
   background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
-.avatar {
+.stickman {
+  position: relative;
   width: 92px;
-  height: 92px;
+  height: 132px;
   margin-bottom: 14px;
-  border-radius: 24px;
 }
 
-.player-avatar {
-  background: linear-gradient(135deg, #38bdf8, #2563eb);
+.stickman span {
+  position: absolute;
+  display: block;
+  background: currentColor;
+  left: 50%;
+  transform-origin: top center;
 }
 
-.enemy-avatar {
-  background: linear-gradient(135deg, #fb7185, #7f1d1d);
+.stickman .head {
+  top: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
+
+.stickman .body {
+  top: 30px;
+  width: 6px;
+  height: 42px;
+  transform: translateX(-50%);
+}
+
+.stickman .arm {
+  top: 40px;
+  width: 6px;
+  height: 34px;
+}
+
+.stickman .arm-left { transform: translateX(-50%) rotate(46deg); }
+.stickman .arm-right { transform: translateX(-50%) rotate(-46deg); }
+.stickman .leg {
+  top: 68px;
+  width: 6px;
+  height: 40px;
+}
+
+.stickman .leg-left { transform: translateX(-50%) rotate(28deg); }
+.stickman .leg-right { transform: translateX(-50%) rotate(-28deg); }
+
+.player-stickman { color: #38bdf8; }
+.enemy-stickman { color: #fb7185; }
 
 .hp-bar {
   margin-top: 14px;
@@ -159,33 +194,25 @@ h1 {
   overflow: hidden;
 }
 
-.hp-fill {
-  height: 100%;
-  border-radius: inherit;
-}
-
+.hp-fill { height: 100%; border-radius: inherit; }
 .player-fill { background: linear-gradient(90deg, #38bdf8, #2563eb); }
 .enemy-fill { background: linear-gradient(90deg, #fb7185, #b91c1c); }
-
 .state-text { margin-top: 14px; }
 
-.versus-core {
+.center-status {
   display: grid;
   justify-items: center;
   gap: 16px;
 }
 
-.charge-ring {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 1.4rem;
+.boost-badge {
+  min-width: 92px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  text-align: center;
   font-weight: 700;
-  background:
-    radial-gradient(circle at center, rgba(15, 23, 42, 0.92) 50%, transparent 52%),
-    conic-gradient(#f97316 0deg, #38bdf8 220deg, rgba(148, 163, 184, 0.15) 220deg);
+  background: rgba(249, 115, 22, 0.22);
+  border: 1px solid rgba(249, 115, 22, 0.34);
 }
 
 .battle-status { text-align: center; }
@@ -196,7 +223,7 @@ h1 {
   margin-top: 16px;
 }
 
-.skill-card, .action-button {
+.skill-card, .action-button, .quiz-answer {
   width: 100%;
   border-radius: 20px;
   border: 1px solid rgba(148, 163, 184, 0.24);
@@ -220,19 +247,39 @@ h1 {
 
 .skill-card p { margin-top: 10px; }
 
+.quiz-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.quiz-question {
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+.quiz-answers {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.quiz-answer {
+  min-height: 52px;
+  background: rgba(30, 41, 59, 0.94);
+}
+
+.quiz-feedback { margin-top: 14px; }
+
 .action-button {
   min-height: 56px;
-  margin-top: 16px;
   font-weight: 700;
 }
 
-.action-button.primary {
-  background: linear-gradient(180deg, #f97316, #c2410c);
-}
-
-.action-button.secondary {
-  background: rgba(30, 41, 59, 0.94);
-}
+.action-button.primary { background: linear-gradient(180deg, #f97316, #c2410c); }
+.action-button.secondary { background: rgba(30, 41, 59, 0.94); }
 
 .history-list {
   margin: 10px 0 0;
@@ -242,7 +289,7 @@ h1 {
 }
 
 @media (max-width: 920px) {
-  .hero-panel, .main-grid, .insight-grid, .score-card, .arena {
+  .hero-panel, .main-grid, .insight-grid, .score-card, .stick-arena, .quiz-actions, .quiz-answers {
     grid-template-columns: 1fr;
   }
   .panel-head { flex-direction: column; }

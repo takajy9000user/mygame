@@ -1,28 +1,58 @@
 import './style.css'
 
-const playerSkills = [
-  { id: 'strike', name: '黒閃ラッシュ', damage: 18, charge: 10, text: '一気に間合いを詰めて強打をたたき込む。' },
-  { id: 'barrier', name: '簡易領域', damage: 8, charge: 18, heal: 10, text: '受け流しながら体勢を立て直す。' },
-  { id: 'burst', name: '術式解放', damage: 26, charge: 16, text: '呪力をまとめて放つ高火力技。' },
+const quizBank = [
+  {
+    question: '8 × 7 はいくつ？',
+    choices: ['54', '56', '63', '58'],
+    answerIndex: 1,
+    explanation: '8 × 7 = 56 です。',
+  },
+  {
+    question: '日本の首都はどこ？',
+    choices: ['大阪', '東京', '京都', '福岡'],
+    answerIndex: 1,
+    explanation: '日本の首都は東京です。',
+  },
+  {
+    question: '水がこおる温度は何℃？',
+    choices: ['10℃', '0℃', '5℃', '100℃'],
+    answerIndex: 1,
+    explanation: '水は 0℃ でこおり始めます。',
+  },
+  {
+    question: '「努力」に近い意味の言葉はどれ？',
+    choices: ['なまける', '力をつくす', 'ねむる', 'あそぶ'],
+    answerIndex: 1,
+    explanation: '努力は目標に向かって力をつくすことです。',
+  },
+]
+
+const moves = [
+  { id: 'jab', name: 'ストレート', damage: 14, text: '素早い一撃で前に出る。', aura: '足を止めずに圧をかける' },
+  { id: 'kick', name: '回し蹴り', damage: 18, text: '大きく踏み込んで蹴りを入れる。', aura: '勢いで主導権を取りにいく' },
+  { id: 'guard', name: 'ガード反撃', damage: 10, heal: 8, text: '守りを固めてから小さく返す。', aura: '落ち着いて隙を待つ' },
 ]
 
 const enemyMoves = [
-  { name: '呪力弾', damage: 12, text: '圧の強い呪力弾を飛ばしてくる。' },
-  { name: '近接連打', damage: 15, text: '素早い連打で押し込んでくる。' },
-  { name: '呪詛の波', damage: 18, text: '濃い呪力の波で大きく削ってくる。' },
+  { name: 'パンチ連打', damage: 11, text: '棒人間の連打が飛んでくる。' },
+  { name: 'ジャンプ蹴り', damage: 15, text: '高い位置から蹴り込んでくる。' },
+  { name: '体当たり', damage: 13, text: '勢いよくぶつかって押してくる。' },
 ]
 
 const state = {
   playerHp: 120,
-  enemyHp: 150,
-  maxPlayerHp: 120,
-  maxEnemyHp: 150,
-  charge: 0,
+  enemyHp: 120,
+  maxHp: 120,
   turn: 1,
+  boostReady: false,
+  boostAmount: 0,
   battleOver: false,
   busy: false,
   history: [],
-  aura: '静かに気配を読む',
+  aura: '様子を見ながら間合いを測る',
+  currentQuestion: null,
+  quizOpen: false,
+  quizDeck: [],
 }
 
 const app = document.querySelector('#app')
@@ -31,11 +61,11 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Jujutsu Battle</p>
-        <h1>呪術バトルゲーム</h1>
+        <p class="eyebrow">Stick Battle Quiz</p>
+        <h1>棒人間バトルゲーム</h1>
         <p class="intro">
-          呪術バトル風の1対1ゲームです。術式を選び、相手の呪霊を祓うまで攻撃を重ねます。
-          <strong>毎ターン相手も反撃してくるので、攻めと立て直しを使い分けます。</strong>
+          棒人間どうしの1対1バトルです。攻撃前にクイズへ挑戦するかは自分で選べます。
+          <strong>クイズに正解すると、その次の攻撃力がアップします。</strong>
         </p>
       </div>
       <div class="score-card">
@@ -44,8 +74,8 @@ app.innerHTML = `
           <strong id="player-hp">120</strong>
         </div>
         <div>
-          <span>敵HP</span>
-          <strong id="enemy-hp">150</strong>
+          <span>相手HP</span>
+          <strong id="enemy-hp">120</strong>
         </div>
         <div>
           <span>ターン</span>
@@ -58,56 +88,85 @@ app.innerHTML = `
       <section class="panel battle-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Battle Field</p>
-            <h2>高専の結界内</h2>
+            <p class="eyebrow">Battle Stage</p>
+            <h2>棒人間ファイト</h2>
           </div>
           <button id="reset-button" class="action-button secondary" type="button">再戦する</button>
         </div>
 
-        <div class="arena">
-          <div class="fighter player">
-            <div class="avatar player-avatar"></div>
-            <h3>主人公の術師</h3>
+        <div class="stick-arena">
+          <div class="fighter-card">
+            <div class="stickman player-stickman">
+              <span class="head"></span>
+              <span class="body"></span>
+              <span class="arm arm-left"></span>
+              <span class="arm arm-right"></span>
+              <span class="leg leg-left"></span>
+              <span class="leg leg-right"></span>
+            </div>
+            <h3>プレイヤー</h3>
             <div class="hp-bar"><div id="player-bar" class="hp-fill player-fill"></div></div>
-            <p id="player-state" class="state-text">呼吸を整えて構えている。</p>
+            <p id="player-state" class="state-text">かまえて様子を見ている。</p>
           </div>
 
-          <div class="versus-core">
-            <div id="charge-ring" class="charge-ring">0%</div>
-            <p id="battle-status" class="battle-status">戦闘開始。最初の一手を選ぼう。</p>
+          <div class="center-status">
+            <div id="boost-badge" class="boost-badge">通常</div>
+            <p id="battle-status" class="battle-status">最初の一手を選んでください。</p>
           </div>
 
-          <div class="fighter enemy">
-            <div class="avatar enemy-avatar"></div>
-            <h3>特級呪霊</h3>
+          <div class="fighter-card">
+            <div class="stickman enemy-stickman">
+              <span class="head"></span>
+              <span class="body"></span>
+              <span class="arm arm-left"></span>
+              <span class="arm arm-right"></span>
+              <span class="leg leg-left"></span>
+              <span class="leg leg-right"></span>
+            </div>
+            <h3>ライバル</h3>
             <div class="hp-bar"><div id="enemy-bar" class="hp-fill enemy-fill"></div></div>
-            <p id="enemy-state" class="state-text">不気味な笑みでこちらを見ている。</p>
+            <p id="enemy-state" class="state-text">腕を回して挑発している。</p>
           </div>
         </div>
       </section>
 
-      <section class="panel skills-panel">
+      <section class="panel action-panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Technique</p>
-            <h2>術式を選ぶ</h2>
+            <p class="eyebrow">Action</p>
+            <h2>行動を選ぶ</h2>
           </div>
         </div>
-        <div id="skills-grid" class="skills-grid"></div>
-        <button id="ultimate-button" class="action-button primary" type="button">領域展開を放つ</button>
+        <div id="moves-grid" class="skills-grid"></div>
+        <div class="quiz-actions">
+          <button id="open-quiz-button" class="action-button primary" type="button">クイズに挑戦する</button>
+          <button id="skip-quiz-button" class="action-button secondary" type="button">クイズなしで戦う</button>
+        </div>
       </section>
+    </section>
+
+    <section class="panel quiz-panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Quiz Boost</p>
+          <h2>攻撃力アップクイズ</h2>
+        </div>
+      </div>
+      <p id="quiz-question" class="quiz-question">クイズに挑戦すると、次の攻撃が強くなります。</p>
+      <div id="quiz-answers" class="quiz-answers"></div>
+      <p id="quiz-feedback" class="quiz-feedback">挑戦するかどうかは自分で決められます。</p>
     </section>
 
     <section class="insight-grid">
       <article class="insight-card">
         <p class="eyebrow">Aura</p>
         <h3>戦況</h3>
-        <p id="aura-text">静かに気配を読む</p>
+        <p id="aura-text">様子を見ながら間合いを測る</p>
       </article>
       <article class="insight-card">
-        <p class="eyebrow">Ultimate</p>
-        <h3>必殺ゲージ</h3>
-        <p id="charge-text">まだ領域展開は使えない。</p>
+        <p class="eyebrow">Boost</p>
+        <h3>攻撃アップ</h3>
+        <p id="boost-text">今は通常ダメージです。</p>
       </article>
       <article class="insight-card">
         <p class="eyebrow">Battle Log</p>
@@ -126,13 +185,26 @@ const enemyBarEl = document.querySelector('#enemy-bar')
 const playerStateEl = document.querySelector('#player-state')
 const enemyStateEl = document.querySelector('#enemy-state')
 const battleStatusEl = document.querySelector('#battle-status')
-const chargeRingEl = document.querySelector('#charge-ring')
-const skillsGridEl = document.querySelector('#skills-grid')
-const ultimateButton = document.querySelector('#ultimate-button')
+const boostBadgeEl = document.querySelector('#boost-badge')
+const movesGridEl = document.querySelector('#moves-grid')
+const openQuizButton = document.querySelector('#open-quiz-button')
+const skipQuizButton = document.querySelector('#skip-quiz-button')
+const quizQuestionEl = document.querySelector('#quiz-question')
+const quizAnswersEl = document.querySelector('#quiz-answers')
+const quizFeedbackEl = document.querySelector('#quiz-feedback')
 const auraTextEl = document.querySelector('#aura-text')
-const chargeTextEl = document.querySelector('#charge-text')
+const boostTextEl = document.querySelector('#boost-text')
 const historyListEl = document.querySelector('#history-list')
 const resetButton = document.querySelector('#reset-button')
+
+function shuffleArray(items) {
+  const next = [...items]
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
+  }
+  return next
+}
 
 function addHistory(text) {
   state.history = [text, ...state.history].slice(0, 6)
@@ -144,22 +216,47 @@ function renderHistory() {
     : '<li>まだ行動はありません。</li>'
 }
 
-function renderSkills() {
-  skillsGridEl.innerHTML = playerSkills
+function refillQuizDeck() {
+  state.quizDeck = shuffleArray(quizBank)
+}
+
+function setQuestion() {
+  if (state.quizDeck.length === 0) refillQuizDeck()
+  state.currentQuestion = state.quizDeck.shift()
+}
+
+function renderQuiz() {
+  if (!state.quizOpen || !state.currentQuestion) {
+    quizQuestionEl.textContent = 'クイズに挑戦すると、次の攻撃が強くなります。'
+    quizAnswersEl.innerHTML = ''
+    return
+  }
+
+  quizQuestionEl.textContent = state.currentQuestion.question
+  quizAnswersEl.innerHTML = state.currentQuestion.choices
+    .map((choice, index) => `<button class="quiz-answer" data-index="${index}" type="button">${choice}</button>`)
+    .join('')
+
+  ;[...quizAnswersEl.querySelectorAll('.quiz-answer')].forEach((button) => {
+    button.addEventListener('click', () => answerQuiz(Number(button.dataset.index)))
+  })
+}
+
+function renderMoves() {
+  movesGridEl.innerHTML = moves
     .map(
-      (skill) => `
-        <button class="skill-card" data-id="${skill.id}" type="button">
-          <strong>${skill.name}</strong>
-          <span>威力 ${skill.damage}</span>
-          <span>ゲージ +${skill.charge}</span>
-          <p>${skill.text}</p>
+      (move) => `
+        <button class="skill-card" data-id="${move.id}" type="button">
+          <strong>${move.name}</strong>
+          <span>威力 ${move.damage + state.boostAmount}</span>
+          <p>${move.text}</p>
         </button>
       `,
     )
     .join('')
 
-  ;[...skillsGridEl.querySelectorAll('.skill-card')].forEach((button) => {
-    button.addEventListener('click', () => performPlayerTurn(button.dataset.id))
+  ;[...movesGridEl.querySelectorAll('.skill-card')].forEach((button) => {
+    button.addEventListener('click', () => performTurn(button.dataset.id))
   })
 }
 
@@ -167,117 +264,139 @@ function renderHud() {
   playerHpEl.textContent = String(state.playerHp)
   enemyHpEl.textContent = String(state.enemyHp)
   turnCountEl.textContent = String(state.turn)
-  playerBarEl.style.width = `${(state.playerHp / state.maxPlayerHp) * 100}%`
-  enemyBarEl.style.width = `${(state.enemyHp / state.maxEnemyHp) * 100}%`
-  chargeRingEl.textContent = `${state.charge}%`
+  playerBarEl.style.width = `${(state.playerHp / state.maxHp) * 100}%`
+  enemyBarEl.style.width = `${(state.enemyHp / state.maxHp) * 100}%`
   auraTextEl.textContent = state.aura
-  chargeTextEl.textContent = state.charge >= 100 ? '領域展開が使える。決めにいける。' : `領域展開まであと ${100 - state.charge}%`
-  ultimateButton.disabled = state.charge < 100 || state.battleOver || state.busy
+  boostBadgeEl.textContent = state.boostReady ? `+${state.boostAmount}` : '通常'
+  boostTextEl.textContent = state.boostReady ? `次の攻撃は +${state.boostAmount} 強化されています。` : '今は通常ダメージです。'
+  openQuizButton.disabled = state.battleOver || state.busy || state.quizOpen
+  skipQuizButton.disabled = state.battleOver || state.busy
+  renderMoves()
+  renderQuiz()
+  renderHistory()
 }
 
-function enemyAttack() {
+function enemyTurn() {
   const move = enemyMoves[Math.floor(Math.random() * enemyMoves.length)]
   state.playerHp = Math.max(0, state.playerHp - move.damage)
-  playerStateEl.textContent = `${move.name}で ${move.damage} ダメージを受けた。`
+  playerStateEl.textContent = `${move.damage} ダメージを受けた。`
   enemyStateEl.textContent = move.text
-  battleStatusEl.textContent = `敵の反撃: ${move.name}`
-  addHistory(`敵が ${move.name} を放ち ${move.damage} ダメージ`)
+  battleStatusEl.textContent = `相手の反撃: ${move.name}`
+  addHistory(`相手の ${move.name} で ${move.damage} ダメージ`)
 
   if (state.playerHp <= 0) {
     state.battleOver = true
-    state.aura = '呪力が尽きて倒れた'
-    battleStatusEl.textContent = '敗北。呪霊を祓えなかった。'
+    state.aura = '立て直せずに倒れた'
+    battleStatusEl.textContent = '敗北。次はクイズ強化も使ってみよう。'
   }
 }
 
 function finishTurn() {
   if (state.enemyHp <= 0) {
     state.battleOver = true
-    state.aura = '呪力の奔流で勝負を決めた'
-    playerStateEl.textContent = '立ち姿のまま勝利した。'
-    enemyStateEl.textContent = '呪霊は浄化されて消えた。'
-    battleStatusEl.textContent = '勝利。呪霊を祓った。'
+    state.aura = '最後まで押し切って勝利した'
+    playerStateEl.textContent = '拳を下ろして勝負あり。'
+    enemyStateEl.textContent = 'その場に倒れ込んだ。'
+    battleStatusEl.textContent = '勝利。棒人間バトルに勝った。'
     renderHud()
-    renderHistory()
     return
   }
 
-  enemyAttack()
+  enemyTurn()
   state.turn += 1
   renderHud()
-  renderHistory()
 }
 
-function performPlayerTurn(skillId) {
+function performTurn(moveId) {
   if (state.busy || state.battleOver) return
 
-  const skill = playerSkills.find((item) => item.id === skillId)
-  if (!skill) return
+  const move = moves.find((item) => item.id === moveId)
+  if (!move) return
 
   state.busy = true
-  state.enemyHp = Math.max(0, state.enemyHp - skill.damage)
-  state.charge = Math.min(100, state.charge + skill.charge)
-  if (skill.heal) {
-    state.playerHp = Math.min(state.maxPlayerHp, state.playerHp + skill.heal)
+  const totalDamage = move.damage + state.boostAmount
+  state.enemyHp = Math.max(0, state.enemyHp - totalDamage)
+  if (move.heal) {
+    state.playerHp = Math.min(state.maxHp, state.playerHp + move.heal)
   }
 
-  state.aura = skill.damage >= 24 ? '呪力が大きく脈打つ' : '間合いを支配している'
-  playerStateEl.textContent = `${skill.name} を発動。`
-  enemyStateEl.textContent = `${skill.damage} ダメージで体勢を崩した。`
-  battleStatusEl.textContent = `${skill.name} が命中`
-  addHistory(`${skill.name} で ${skill.damage} ダメージ`)
+  state.aura = move.aura
+  playerStateEl.textContent = `${move.name} を決めた。`
+  enemyStateEl.textContent = `${totalDamage} ダメージでよろけた。`
+  battleStatusEl.textContent = `${move.name} が命中`
+  addHistory(`${move.name} で ${totalDamage} ダメージ`)
+
+  state.boostReady = false
+  state.boostAmount = 0
+  state.quizOpen = false
+  quizFeedbackEl.textContent = '挑戦するかどうかは自分で決められます。'
 
   renderHud()
-  renderHistory()
 
   window.setTimeout(() => {
     finishTurn()
     state.busy = false
-  }, 380)
+  }, 360)
 }
 
-function performUltimate() {
-  if (state.busy || state.battleOver || state.charge < 100) return
+function answerQuiz(index) {
+  if (!state.quizOpen || !state.currentQuestion || state.busy || state.battleOver) return
 
-  state.busy = true
-  const damage = 44
-  state.enemyHp = Math.max(0, state.enemyHp - damage)
-  state.charge = 0
-  state.aura = '領域展開で空気が変わった'
-  playerStateEl.textContent = '領域展開を発動した。'
-  enemyStateEl.textContent = `${damage} ダメージの直撃で大きく揺らいだ。`
-  battleStatusEl.textContent = '領域展開が炸裂'
-  addHistory(`領域展開で ${damage} ダメージ`)
+  const correct = index === state.currentQuestion.answerIndex
+  if (correct) {
+    state.boostReady = true
+    state.boostAmount = 8
+    quizFeedbackEl.textContent = `正解。${state.currentQuestion.explanation} 次の攻撃が +8 強化されます。`
+    addHistory('クイズ正解で次の攻撃が強化された')
+  } else {
+    state.boostReady = false
+    state.boostAmount = 0
+    quizFeedbackEl.textContent = `不正解。${state.currentQuestion.explanation} 今回は通常ダメージです。`
+    addHistory('クイズ不正解で強化なし')
+  }
 
+  state.quizOpen = false
   renderHud()
-  renderHistory()
+}
 
-  window.setTimeout(() => {
-    finishTurn()
-    state.busy = false
-  }, 420)
+function openQuiz() {
+  if (state.battleOver || state.busy || state.quizOpen) return
+  setQuestion()
+  state.quizOpen = true
+  quizFeedbackEl.textContent = '正解すると次の攻撃力がアップします。'
+  renderHud()
+}
+
+function skipQuiz() {
+  if (state.battleOver || state.busy) return
+  state.quizOpen = false
+  quizFeedbackEl.textContent = 'クイズなしでそのまま戦えます。'
+  renderHud()
 }
 
 function resetBattle() {
   state.playerHp = 120
-  state.enemyHp = 150
-  state.maxPlayerHp = 120
-  state.maxEnemyHp = 150
-  state.charge = 0
+  state.enemyHp = 120
+  state.maxHp = 120
   state.turn = 1
+  state.boostReady = false
+  state.boostAmount = 0
   state.battleOver = false
   state.busy = false
   state.history = []
-  state.aura = '静かに気配を読む'
-  playerStateEl.textContent = '呼吸を整えて構えている。'
-  enemyStateEl.textContent = '不気味な笑みでこちらを見ている。'
-  battleStatusEl.textContent = '戦闘開始。最初の一手を選ぼう。'
+  state.aura = '様子を見ながら間合いを測る'
+  state.currentQuestion = null
+  state.quizOpen = false
+  refillQuizDeck()
+  playerStateEl.textContent = 'かまえて様子を見ている。'
+  enemyStateEl.textContent = '腕を回して挑発している。'
+  battleStatusEl.textContent = '最初の一手を選んでください。'
+  quizFeedbackEl.textContent = '挑戦するかどうかは自分で決められます。'
   renderHud()
-  renderHistory()
 }
 
-ultimateButton.addEventListener('click', performUltimate)
+openQuizButton.addEventListener('click', openQuiz)
+skipQuizButton.addEventListener('click', skipQuiz)
 resetButton.addEventListener('click', resetBattle)
 
-renderSkills()
 resetBattle()
