@@ -3,27 +3,31 @@ import './style.css'
 const machine = {
   width: 900,
   height: 480,
-  railY: 62,
-  leftBarX: 270,
-  rightBarX: 510,
-  barY: 300,
-  barWidth: 140,
+  railY: 54,
+  leftWallX: 60,
+  rightWallX: 840,
+  leftBarX: 255,
+  rightBarX: 515,
+  barY: 312,
+  barWidth: 130,
   barHeight: 12,
-  floorY: 430,
+  floorY: 438,
 }
 
 const state = {
   coins: 5,
   plays: 0,
   wins: 0,
-  armX: 430,
+  armX: 450,
   armY: machine.railY,
-  dropping: false,
-  rising: false,
-  movingLeft: false,
-  movingRight: false,
-  status: '左右に動かして、狙った位置でアームを下ろそう。',
-  box: {},
+  phase: 'idle',
+  moveLeft: false,
+  moveRight: false,
+  status: '左右で位置を合わせ、タイミングを見てアームを下ろそう。',
+  memo: '箱の角を狙って、上がるときに少し持ち上げるのが基本です。',
+  history: [],
+  box: null,
+  grab: null,
 }
 
 const app = document.querySelector('#app')
@@ -35,8 +39,7 @@ app.innerHTML = `
         <p class="eyebrow">Bridge Crane</p>
         <h1>橋渡しのクレーンゲーム</h1>
         <p class="intro">
-          箱を2本バーの上で少しずつずらし、2本のバーの間へ落とす橋渡しゲームです。
-          <strong>アームは左右移動して、タイミングよく下降させます。</strong>
+          景品箱は2本の棒にまたがって置かれています。アームを自分で動かし、<strong>引き上げながら少しずつ箱をずらして、最後に2本の棒の間へ通せば成功</strong>です。
         </p>
       </div>
       <div class="score-card">
@@ -65,7 +68,7 @@ app.innerHTML = `
           <button id="drop-button" class="action-button primary" type="button">アームを下ろす</button>
         </div>
         <canvas id="game-canvas" class="game-canvas" width="900" height="480" aria-label="橋渡しクレーンゲーム"></canvas>
-        <p id="status-text" class="status-text">左右に動かして、狙った位置でアームを下ろそう。</p>
+        <p id="status-text" class="status-text">左右で位置を合わせ、タイミングを見てアームを下ろそう。</p>
       </section>
 
       <section class="panel control-panel">
@@ -84,8 +87,8 @@ app.innerHTML = `
 
         <div class="tip-card">
           <p class="eyebrow">Tips</p>
-          <p>箱の左か右の角を押すと、少し回転しながら前に進みます。</p>
-          <p>片側の支えが少なくなると、箱がバーの間へ落ちやすくなります。</p>
+          <p>中心より少し外した位置で当てると、片側だけ持ち上がって箱が進みやすくなります。</p>
+          <p>一気に落とすのではなく、何回かで角度をつけて、支えを減らしていきます。</p>
           <p>操作キーは ← → Space でも使えます。</p>
         </div>
 
@@ -102,7 +105,7 @@ app.innerHTML = `
       <article class="insight-card">
         <p class="eyebrow">Machine Memo</p>
         <h3>攻略メモ</h3>
-        <p id="memo-text">最初は中心より少し右か左を押して角度をつけると動かしやすいです。</p>
+        <p id="memo-text">箱の角を狙って、上がるときに少し持ち上げるのが基本です。</p>
       </article>
       <article class="insight-card">
         <p class="eyebrow">Log</p>
@@ -130,48 +133,34 @@ const ctx = canvas.getContext('2d')
 
 function createBox() {
   return {
-    x: 430,
-    y: 264,
-    width: 144,
-    height: 42,
-    angle: 0.06,
-    falling: false,
+    x: 450,
+    y: 286,
+    width: 146,
+    height: 44,
+    angle: 0.05,
     vx: 0,
     vy: 0,
-    settled: true,
+    falling: false,
     won: false,
+    settled: true,
   }
 }
 
-function resetPrizeBox() {
-  state.box = createBox()
-  state.armX = 430
-  state.armY = machine.railY
-  state.dropping = false
-  state.rising = false
-  state.status = '箱の端を押して、少しずつ前へ送ろう。'
-  memoTextEl.textContent = '最初は中心より少し右か左を押して角度をつけると動かしやすいです。'
-}
-
 function addHistory(text) {
-  state.history = [text, ...(state.history ?? [])].slice(0, 6)
+  state.history = [text, ...state.history].slice(0, 6)
   historyListEl.innerHTML = state.history.length
     ? state.history.map((entry) => `<li>${entry}</li>`).join('')
     : '<li>まだプレイ記録はありません。</li>'
 }
 
-state.history = []
-
-function renderHud() {
-  coinCountEl.textContent = String(state.coins)
-  playCountEl.textContent = String(state.plays)
-  winCountEl.textContent = String(state.wins)
-  statusTextEl.textContent = state.status
-  boxStateEl.textContent = state.box.won
-    ? '2本のバーの間に落ちた。成功です。'
-    : state.box.falling
-      ? '箱が落下中。位置を見守ろう。'
-      : `箱の角度 ${(state.box.angle * 57.3).toFixed(1)}° / 横位置 ${Math.round(state.box.x)}`
+function resetPrizeBox() {
+  state.box = createBox()
+  state.grab = null
+  state.armX = 450
+  state.armY = machine.railY
+  state.phase = 'idle'
+  state.status = '箱の端を狙って、少しずつ横へ送ろう。'
+  state.memo = '箱の角を狙って、上がるときに少し持ち上げるのが基本です。'
 }
 
 function drawRoundedRect(x, y, width, height, radius) {
@@ -195,21 +184,23 @@ function drawMachine() {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   ctx.fillStyle = '#cbd5e1'
-  ctx.fillRect(40, 24, 820, 24)
+  ctx.fillRect(42, 24, 816, 24)
 
   ctx.fillStyle = '#94a3b8'
-  ctx.fillRect(60, 48, 18, 360)
-  ctx.fillRect(822, 48, 18, 360)
+  ctx.fillRect(machine.leftWallX, 48, 18, 366)
+  ctx.fillRect(machine.rightWallX - 18, 48, 18, 366)
 
   ctx.fillStyle = '#334155'
   ctx.fillRect(machine.leftBarX, machine.barY, machine.barWidth, machine.barHeight)
   ctx.fillRect(machine.rightBarX, machine.barY, machine.barWidth, machine.barHeight)
 
+  const gapX = machine.leftBarX + machine.barWidth
+  const gapWidth = machine.rightBarX - gapX
   ctx.fillStyle = '#0f172a'
-  ctx.fillRect(machine.leftBarX + machine.barWidth, machine.barY + 2, machine.rightBarX - (machine.leftBarX + machine.barWidth), 120)
+  ctx.fillRect(gapX, machine.barY + 4, gapWidth, 108)
   ctx.strokeStyle = '#f59e0b'
   ctx.lineWidth = 3
-  ctx.strokeRect(machine.leftBarX + machine.barWidth, machine.barY + 8, machine.rightBarX - (machine.leftBarX + machine.barWidth), 90)
+  ctx.strokeRect(gapX, machine.barY + 8, gapWidth, 88)
 
   ctx.strokeStyle = '#475569'
   ctx.lineWidth = 4
@@ -219,11 +210,11 @@ function drawMachine() {
   ctx.stroke()
 
   ctx.fillStyle = '#e2e8f0'
-  ctx.fillRect(state.armX - 26, state.armY, 12, 52)
-  ctx.fillRect(state.armX + 14, state.armY, 12, 52)
+  ctx.fillRect(state.armX - 29, state.armY, 12, 66)
+  ctx.fillRect(state.armX + 17, state.armY, 12, 66)
   ctx.fillStyle = '#94a3b8'
-  ctx.fillRect(state.armX - 16, state.armY + 44, 14, 10)
-  ctx.fillRect(state.armX + 2, state.armY + 44, 14, 10)
+  ctx.fillRect(state.armX - 18, state.armY + 58, 14, 10)
+  ctx.fillRect(state.armX + 4, state.armY + 58, 14, 10)
 }
 
 function drawPrizeBox() {
@@ -239,77 +230,126 @@ function drawPrizeBox() {
   ctx.restore()
 }
 
-function startDrop() {
-  if (state.dropping || state.rising || state.box.won || state.coins <= 0) {
+function getSupports(box) {
+  const leftEdge = box.x - box.width / 2
+  const rightEdge = box.x + box.width / 2
+  const leftSupport = Math.max(
+    0,
+    Math.min(rightEdge, machine.leftBarX + machine.barWidth) - Math.max(leftEdge, machine.leftBarX),
+  )
+  const rightSupport = Math.max(
+    0,
+    Math.min(rightEdge, machine.rightBarX + machine.barWidth) - Math.max(leftEdge, machine.rightBarX),
+  )
+
+  return { leftSupport, rightSupport }
+}
+
+function updateHud() {
+  coinCountEl.textContent = String(state.coins)
+  playCountEl.textContent = String(state.plays)
+  winCountEl.textContent = String(state.wins)
+  statusTextEl.textContent = state.status
+  memoTextEl.textContent = state.memo
+
+  const supports = getSupports(state.box)
+  boxStateEl.textContent = state.box.won
+    ? '2本の棒の間を通って落ちた。成功です。'
+    : state.box.falling
+      ? '箱が棒の間へ落下中。'
+      : `左の支え ${Math.round(supports.leftSupport)} / 右の支え ${Math.round(supports.rightSupport)} / 角度 ${(state.box.angle * 57.3).toFixed(1)}°`
+}
+
+function beginDrop() {
+  if (state.phase !== 'idle' || state.box.won || state.coins <= 0) {
     return
   }
 
   state.coins -= 1
   state.plays += 1
-  state.dropping = true
-  state.status = 'アーム下降中。箱に当たる位置を見よう。'
+  state.phase = 'descending'
+  state.status = 'アーム下降中。どこを持ち上げるか見よう。'
   addHistory(`プレイ ${state.plays} 回目: アームを下降`)
 }
 
-function nudgeBox() {
+function tryGrabBox() {
   const box = state.box
-  const leftBarRight = machine.leftBarX + machine.barWidth
-  const rightBarLeft = machine.rightBarX
   const horizontalOffset = state.armX - box.x
-  if (Math.abs(horizontalOffset) > box.width / 2 + 18) {
-    state.status = '箱に届かなかった。位置を少しずらして再挑戦。'
-    memoTextEl.textContent = '中心から外しすぎると箱に当たりません。'
+
+  if (Math.abs(horizontalOffset) > box.width / 2 + 24) {
+    state.grab = null
+    state.status = '箱に届かなかった。位置を少し修正して再挑戦。'
+    state.memo = '中心から離れすぎると箱を持ち上げられません。'
     return
   }
 
-  const force = horizontalOffset > 0 ? 1 : -1
-  const edgeHit = Math.abs(horizontalOffset) / (box.width / 2)
-  box.x += force * (12 + edgeHit * 18)
-  box.angle += force * (0.05 + edgeHit * 0.06)
-  box.angle = Math.max(-0.55, Math.min(0.55, box.angle))
+  const side = horizontalOffset < 0 ? 'left' : 'right'
+  const edgeFactor = Math.min(1, Math.abs(horizontalOffset) / (box.width / 2))
+  state.grab = {
+    side,
+    strength: 0.8 + edgeFactor * 0.7,
+    edgeFactor,
+  }
 
-  const nextLeft = box.x - box.width / 2
-  const nextRight = box.x + box.width / 2
-  const leftSupport = Math.max(0, Math.min(nextRight, leftBarRight) - Math.max(nextLeft, machine.leftBarX))
-  const rightSupport = Math.max(0, Math.min(nextRight, machine.rightBarX + machine.barWidth) - Math.max(nextLeft, rightBarLeft))
+  state.status = side === 'left' ? '左側を持ち上げた。戻りで箱が右へずれる。' : '右側を持ち上げた。戻りで箱が左へずれる。'
+  state.memo = edgeFactor > 0.55 ? '良い位置です。角をしっかり持ち上げられています。' : 'もう少し端を狙うと、さらに大きく動かせます。'
+}
 
-  if (leftSupport < 30 || rightSupport < 30) {
+function applyLiftMotion() {
+  const box = state.box
+  const grab = state.grab
+  if (!grab || box.falling) {
+    return
+  }
+
+  const liftDirection = grab.side === 'left' ? 1 : -1
+  const shift = (1.1 + grab.edgeFactor * 1.6) * liftDirection
+  box.x += shift
+  box.y -= 0.28 * grab.strength
+  box.angle += 0.012 * liftDirection * grab.strength
+  box.angle = Math.max(-0.72, Math.min(0.72, box.angle))
+
+  const supports = getSupports(box)
+  if (supports.leftSupport < 18 || supports.rightSupport < 18) {
     box.falling = true
-    box.vx = force * (0.8 + edgeHit * 0.4)
-    box.vy = 2.2
-    box.settled = false
-    state.status = '支えが少なくなって、箱がバーの間へ落ち始めた。'
-    memoTextEl.textContent = 'このまま2本のバーの間へ落ちれば成功です。'
-  } else {
-    state.status = edgeHit > 0.55 ? '箱の角を押して前に進んだ。もう一度同じ側を狙えます。' : '箱の中心寄りに当たった。次はもっと端を狙うと動きます。'
-    memoTextEl.textContent = '端を押すほど回転して前に進みやすくなります。'
+    box.vx = shift * 0.52
+    box.vy = 1.8
+    state.status = '支えが減って、箱が棒の間へ落ち始めた。'
+    state.memo = 'このまま棒の間を通れば成功です。'
   }
 }
 
 function updateArm() {
-  if (!state.dropping && !state.rising) {
-    if (state.movingLeft) state.armX = Math.max(120, state.armX - 4)
-    if (state.movingRight) state.armX = Math.min(780, state.armX + 4)
+  if (state.phase === 'idle') {
+    if (state.moveLeft) state.armX = Math.max(120, state.armX - 4)
+    if (state.moveRight) state.armX = Math.min(780, state.armX + 4)
     return
   }
 
-  if (state.dropping) {
+  if (state.phase === 'descending') {
     state.armY += 8
-    if (state.armY >= state.box.y - 56) {
-      nudgeBox()
-      state.dropping = false
-      state.rising = true
+    if (state.armY >= state.box.y - 70) {
+      tryGrabBox()
+      state.phase = 'ascending'
     }
-  } else if (state.rising) {
-    state.armY -= 10
+    return
+  }
+
+  if (state.phase === 'ascending') {
+    state.armY -= 9
+    applyLiftMotion()
     if (state.armY <= machine.railY) {
       state.armY = machine.railY
-      state.rising = false
+      state.phase = 'idle'
+      state.grab = null
+      if (!state.box.falling && !state.box.won) {
+        state.status = 'アームが戻った。もう一度少しずつずらそう。'
+      }
     }
   }
 }
 
-function updateBox() {
+function updateBoxPhysics() {
   const box = state.box
   if (!box.falling) {
     return
@@ -318,63 +358,63 @@ function updateBox() {
   box.x += box.vx
   box.y += box.vy
   box.vy += 0.18
-  box.angle += box.vx * 0.012
+  box.angle += box.vx * 0.015
 
   if (box.y >= machine.floorY) {
     const gapLeft = machine.leftBarX + machine.barWidth
     const gapRight = machine.rightBarX
+    box.falling = false
+
     if (box.x > gapLeft && box.x < gapRight) {
       box.won = true
-      box.falling = false
       state.wins += 1
-      state.status = '成功。2本のバーの間に落ちた。'
-      addHistory(`プレイ ${state.plays} 回目: バーの間に落として成功`)
-      memoTextEl.textContent = '片側の支えを減らして、中央の隙間へ落とせました。'
+      state.status = '成功。箱が2本の棒の間を通った。'
+      state.memo = '片側を何回か持ち上げて、支えを減らせたのが勝因です。'
+      addHistory(`プレイ ${state.plays} 回目: 棒の間に落として成功`)
     } else {
-      box.falling = false
-      state.status = '惜しい。バーの外側へ落ちた。'
+      state.status = '惜しい。外側へ落ちた。'
+      state.memo = 'もう少し中央寄りで支えを減らすと、棒の間へ落ちやすくなります。'
       addHistory(`プレイ ${state.plays} 回目: 外側へ落ちて失敗`)
-      memoTextEl.textContent = 'バーの間の真上で落ちるように、ずらし幅を小さく調整すると良いです。'
     }
   }
 }
 
-function gameLoop() {
+function loop() {
   updateArm()
-  updateBox()
+  updateBoxPhysics()
   drawMachine()
   drawPrizeBox()
-  renderHud()
-  requestAnimationFrame(gameLoop)
+  updateHud()
+  requestAnimationFrame(loop)
 }
 
-function setMove(direction, pressed) {
-  if (direction === 'left') state.movingLeft = pressed
-  if (direction === 'right') state.movingRight = pressed
+function setDirection(direction, pressed) {
+  if (direction === 'left') state.moveLeft = pressed
+  if (direction === 'right') state.moveRight = pressed
 }
 
 document.addEventListener('keydown', (event) => {
-  if (event.code === 'ArrowLeft') setMove('left', true)
-  if (event.code === 'ArrowRight') setMove('right', true)
+  if (event.code === 'ArrowLeft') setDirection('left', true)
+  if (event.code === 'ArrowRight') setDirection('right', true)
   if (event.code === 'Space') {
     event.preventDefault()
-    startDrop()
+    beginDrop()
   }
 })
 
 document.addEventListener('keyup', (event) => {
-  if (event.code === 'ArrowLeft') setMove('left', false)
-  if (event.code === 'ArrowRight') setMove('right', false)
+  if (event.code === 'ArrowLeft') setDirection('left', false)
+  if (event.code === 'ArrowRight') setDirection('right', false)
 })
 
-leftButton.addEventListener('pointerdown', () => setMove('left', true))
-leftButton.addEventListener('pointerup', () => setMove('left', false))
-leftButton.addEventListener('pointerleave', () => setMove('left', false))
-rightButton.addEventListener('pointerdown', () => setMove('right', true))
-rightButton.addEventListener('pointerup', () => setMove('right', false))
-rightButton.addEventListener('pointerleave', () => setMove('right', false))
-dropButton.addEventListener('click', startDrop)
-dropSideButton.addEventListener('click', startDrop)
+leftButton.addEventListener('pointerdown', () => setDirection('left', true))
+leftButton.addEventListener('pointerup', () => setDirection('left', false))
+leftButton.addEventListener('pointerleave', () => setDirection('left', false))
+rightButton.addEventListener('pointerdown', () => setDirection('right', true))
+rightButton.addEventListener('pointerup', () => setDirection('right', false))
+rightButton.addEventListener('pointerleave', () => setDirection('right', false))
+dropButton.addEventListener('click', beginDrop)
+dropSideButton.addEventListener('click', beginDrop)
 resetButton.addEventListener('click', () => {
   resetPrizeBox()
   addHistory('箱を置き直した')
@@ -382,5 +422,5 @@ resetButton.addEventListener('click', () => {
 
 historyListEl.innerHTML = '<li>まだプレイ記録はありません。</li>'
 resetPrizeBox()
-renderHud()
-gameLoop()
+updateHud()
+loop()
