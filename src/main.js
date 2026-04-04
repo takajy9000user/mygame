@@ -4,12 +4,12 @@ const machine = {
   width: 900,
   height: 480,
   railY: 62,
-  leftBarX: 250,
-  rightBarX: 610,
+  leftBarX: 270,
+  rightBarX: 510,
   barY: 300,
-  barWidth: 120,
+  barWidth: 140,
   barHeight: 12,
-  goalY: 420,
+  floorY: 430,
 }
 
 const state = {
@@ -35,7 +35,7 @@ app.innerHTML = `
         <p class="eyebrow">Bridge Crane</p>
         <h1>橋渡しのクレーンゲーム</h1>
         <p class="intro">
-          箱を2本バーの上で少しずつずらし、落として景品口へ入れる橋渡しゲームです。
+          箱を2本バーの上で少しずつずらし、2本のバーの間へ落とす橋渡しゲームです。
           <strong>アームは左右移動して、タイミングよく下降させます。</strong>
         </p>
       </div>
@@ -85,7 +85,7 @@ app.innerHTML = `
         <div class="tip-card">
           <p class="eyebrow">Tips</p>
           <p>箱の左か右の角を押すと、少し回転しながら前に進みます。</p>
-          <p>バーの端まで運ぶと、箱が傾いて落ちやすくなります。</p>
+          <p>片側の支えが少なくなると、箱がバーの間へ落ちやすくなります。</p>
           <p>操作キーは ← → Space でも使えます。</p>
         </div>
 
@@ -168,7 +168,7 @@ function renderHud() {
   winCountEl.textContent = String(state.wins)
   statusTextEl.textContent = state.status
   boxStateEl.textContent = state.box.won
-    ? '景品口に落ちた。成功です。'
+    ? '2本のバーの間に落ちた。成功です。'
     : state.box.falling
       ? '箱が落下中。位置を見守ろう。'
       : `箱の角度 ${(state.box.angle * 57.3).toFixed(1)}° / 横位置 ${Math.round(state.box.x)}`
@@ -206,9 +206,10 @@ function drawMachine() {
   ctx.fillRect(machine.rightBarX, machine.barY, machine.barWidth, machine.barHeight)
 
   ctx.fillStyle = '#0f172a'
-  ctx.fillRect(388, machine.goalY, 124, 22)
-  ctx.fillStyle = '#f59e0b'
-  ctx.fillRect(388, machine.goalY + 22, 124, 20)
+  ctx.fillRect(machine.leftBarX + machine.barWidth, machine.barY + 2, machine.rightBarX - (machine.leftBarX + machine.barWidth), 120)
+  ctx.strokeStyle = '#f59e0b'
+  ctx.lineWidth = 3
+  ctx.strokeRect(machine.leftBarX + machine.barWidth, machine.barY + 8, machine.rightBarX - (machine.leftBarX + machine.barWidth), 90)
 
   ctx.strokeStyle = '#475569'
   ctx.lineWidth = 4
@@ -252,6 +253,8 @@ function startDrop() {
 
 function nudgeBox() {
   const box = state.box
+  const leftBarRight = machine.leftBarX + machine.barWidth
+  const rightBarLeft = machine.rightBarX
   const horizontalOffset = state.armX - box.x
   if (Math.abs(horizontalOffset) > box.width / 2 + 18) {
     state.status = '箱に届かなかった。位置を少しずらして再挑戦。'
@@ -265,13 +268,18 @@ function nudgeBox() {
   box.angle += force * (0.05 + edgeHit * 0.06)
   box.angle = Math.max(-0.55, Math.min(0.55, box.angle))
 
-  if (box.x + box.width / 2 < machine.rightBarX + 26 && box.x - box.width / 2 > machine.leftBarX + machine.barWidth - 26) {
+  const nextLeft = box.x - box.width / 2
+  const nextRight = box.x + box.width / 2
+  const leftSupport = Math.max(0, Math.min(nextRight, leftBarRight) - Math.max(nextLeft, machine.leftBarX))
+  const rightSupport = Math.max(0, Math.min(nextRight, machine.rightBarX + machine.barWidth) - Math.max(nextLeft, rightBarLeft))
+
+  if (leftSupport < 30 || rightSupport < 30) {
     box.falling = true
-    box.vx = force * (1.4 + edgeHit)
+    box.vx = force * (0.8 + edgeHit * 0.4)
     box.vy = 2.2
     box.settled = false
-    state.status = '箱が橋から外れて落下し始めた。'
-    memoTextEl.textContent = 'このまま景品口の上まで落ちれば成功です。'
+    state.status = '支えが少なくなって、箱がバーの間へ落ち始めた。'
+    memoTextEl.textContent = 'このまま2本のバーの間へ落ちれば成功です。'
   } else {
     state.status = edgeHit > 0.55 ? '箱の角を押して前に進んだ。もう一度同じ側を狙えます。' : '箱の中心寄りに当たった。次はもっと端を狙うと動きます。'
     memoTextEl.textContent = '端を押すほど回転して前に進みやすくなります。'
@@ -312,19 +320,21 @@ function updateBox() {
   box.vy += 0.18
   box.angle += box.vx * 0.012
 
-  if (box.y >= machine.goalY + 44) {
-    if (box.x > 390 && box.x < 510) {
+  if (box.y >= machine.floorY) {
+    const gapLeft = machine.leftBarX + machine.barWidth
+    const gapRight = machine.rightBarX
+    if (box.x > gapLeft && box.x < gapRight) {
       box.won = true
       box.falling = false
       state.wins += 1
-      state.status = '成功。景品口に落ちた。'
-      addHistory(`プレイ ${state.plays} 回目: 景品ゲット成功`)
-      memoTextEl.textContent = '角度をつけてバーの端まで送れたのが勝因です。'
+      state.status = '成功。2本のバーの間に落ちた。'
+      addHistory(`プレイ ${state.plays} 回目: バーの間に落として成功`)
+      memoTextEl.textContent = '片側の支えを減らして、中央の隙間へ落とせました。'
     } else {
       box.falling = false
-      state.status = '惜しい。景品口の外へ落ちた。'
-      addHistory(`プレイ ${state.plays} 回目: 落下したが外れ`)
-      memoTextEl.textContent = '箱をもう少し中央へ寄せて落とすと成功しやすいです。'
+      state.status = '惜しい。バーの外側へ落ちた。'
+      addHistory(`プレイ ${state.plays} 回目: 外側へ落ちて失敗`)
+      memoTextEl.textContent = 'バーの間の真上で落ちるように、ずらし幅を小さく調整すると良いです。'
     }
   }
 }
