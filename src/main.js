@@ -1,4 +1,4 @@
-﻿import './style.css'
+import './style.css'
 
 const zones = [
   {
@@ -69,6 +69,65 @@ const keeperProfiles = [
   },
 ]
 
+const quizBank = [
+  {
+    subject: '算数',
+    question: '0.25L は何mLでしょう？',
+    choices: ['25mL', '250mL', '2500mL', '75mL'],
+    answerIndex: 1,
+    explanation: '1L は 1000mL なので、0.25L は 250mL です。',
+  },
+  {
+    subject: '算数',
+    question: '3/4 と同じ大きさの小数はどれ？',
+    choices: ['0.25', '0.34', '0.75', '0.8'],
+    answerIndex: 2,
+    explanation: '4つに分けたうちの3つ分なので 0.75 です。',
+  },
+  {
+    subject: '理科',
+    question: '月が光って見えるのはなぜ？',
+    choices: ['月が自分で光るから', '太陽の光を反射するから', '星の光を集めるから', '雲が光らせるから'],
+    answerIndex: 1,
+    explanation: '月は自分では光らず、太陽の光を反射して見えます。',
+  },
+  {
+    subject: '理科',
+    question: '植物が昼に行う「でんぷんをつくるはたらき」は？',
+    choices: ['発芽', '蒸発', '光合成', '消化'],
+    answerIndex: 2,
+    explanation: '日光を使って養分をつくるはたらきが光合成です。',
+  },
+  {
+    subject: '社会',
+    question: '日本でいちばん面積が広い都道府県は？',
+    choices: ['北海道', '岩手県', '長野県', '新潟県'],
+    answerIndex: 0,
+    explanation: '北海道が最も広い都道府県です。',
+  },
+  {
+    subject: '社会',
+    question: '国会で法律をつくる中心となる場所は？',
+    choices: ['裁判所', '市役所', '国会議事堂', '警察署'],
+    answerIndex: 2,
+    explanation: '国会議事堂で国会が開かれ、法律づくりが進みます。',
+  },
+  {
+    subject: '国語',
+    question: '「努力」の意味にいちばん近い言葉は？',
+    choices: ['なまけること', '力をつくすこと', 'あきらめること', '休むこと'],
+    answerIndex: 1,
+    explanation: '努力は、目標に向かって力をつくすことです。',
+  },
+  {
+    subject: '国語',
+    question: '「潮」の読みとして正しいものはどれ？',
+    choices: ['しお', 'うみ', 'なみ', 'みず'],
+    answerIndex: 0,
+    explanation: '「潮」は「しお」と読み、海の満ち引きにも使います。',
+  },
+]
+
 const state = {
   shotNumber: 1,
   maxShots: 5,
@@ -79,6 +138,12 @@ const state = {
   busy: false,
   history: [],
   keeperProfile: keeperProfiles[0],
+  keeperBoost: 0,
+  quizDeck: [],
+  currentQuestion: null,
+  selectedChoice: null,
+  answerResolved: false,
+  lastAnswerCorrect: null,
 }
 
 const app = document.querySelector('#app')
@@ -87,10 +152,10 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Penalty Kick Lab</p>
-        <h1>PKで読み合いながら楽しく学ぶ</h1>
+        <p class="eyebrow">Quiz Penalty Keeper</p>
+        <h1>クイズに答えて PK を決めよう</h1>
         <p class="intro">
-          ねらう場所とキックの強さを選んでシュート。<strong>キーパーの動きを読んで、5本の勝負でできるだけ多く決めよう。</strong>
+          日本の小学生高学年向けの4択クイズに答えてからシュート。<strong>間違えるたびにキーパーが強くなり、読みも反応もどんどん鋭くなります。</strong>
         </p>
       </div>
       <div class="score-card">
@@ -125,6 +190,22 @@ app.innerHTML = `
         </div>
       </div>
 
+      <section class="quiz-card">
+        <div class="quiz-head">
+          <div>
+            <p class="eyebrow">Quiz Mission</p>
+            <h3 id="quiz-subject">算数</h3>
+          </div>
+          <div class="keeper-boost-box">
+            <p class="label">キーパー強化</p>
+            <strong id="keeper-boost">Lv.0</strong>
+          </div>
+        </div>
+        <p id="question-text" class="question-text"></p>
+        <div id="answer-buttons" class="answer-grid"></div>
+        <p id="quiz-feedback" class="quiz-feedback">答えを選ぶと結果が出ます。正解ならそのまま攻め、不正解ならキーパーが強化されます。</p>
+      </section>
+
       <div class="pitch">
         <div class="goal" aria-hidden="true">
           <div class="net-lines"></div>
@@ -146,7 +227,7 @@ app.innerHTML = `
         <div class="mobile-controls" aria-label="タッチ操作パネル">
           <button id="aim-prev" class="action-button secondary" type="button">ねらい ←</button>
           <button id="power-down" class="action-button secondary" type="button">パワー -</button>
-          <button id="shoot-button" class="action-button primary" type="button">シュート</button>
+          <button id="shoot-button" class="action-button primary" type="button">答えてシュート</button>
           <button id="power-up" class="action-button secondary" type="button">パワー +</button>
           <button id="aim-next" class="action-button secondary" type="button">ねらい →</button>
         </div>
@@ -154,7 +235,7 @@ app.innerHTML = `
         <div class="control-row">
           <div class="control-box">
             <p class="label">操作</p>
-            <p>ゴール内をタップしてコースを選び、下のボタンで強さを調整してシュート。</p>
+            <p>4択クイズに答えてから、ゴール内をタップしてコースを選び、強さを調整してシュートします。</p>
           </div>
           <div class="control-box">
             <p class="label">成功メモ</p>
@@ -176,14 +257,14 @@ app.innerHTML = `
         <p class="eyebrow">Scout Report</p>
         <h3>相手の傾向</h3>
         <p id="keeper-hint"></p>
-        <p class="detail">ラウンドごとにキーパーのねらいが少し変わります。次の1本を考えながら打つのがコツです。</p>
+        <p id="keeper-boost-detail" class="detail"></p>
       </article>
 
       <article class="insight-card">
         <p class="eyebrow">Last Shot</p>
         <h3>前回の結果</h3>
-        <p id="result-text">1本目が始まります。まずはキーパーの傾向を読んでみましょう。</p>
-        <p id="result-detail" class="detail">高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。</p>
+        <p id="result-text">1本目が始まります。まずはクイズに答えて、キーパーの傾向も読んでみましょう。</p>
+        <p id="result-detail" class="detail">正解なら落ち着いて狙えます。不正解だとキーパーが強化されて厳しくなります。</p>
       </article>
     </section>
 
@@ -210,6 +291,7 @@ const successNoteEl = document.querySelector('#success-note')
 const coachTipEl = document.querySelector('#coach-tip')
 const coachDetailEl = document.querySelector('#coach-detail')
 const keeperHintEl = document.querySelector('#keeper-hint')
+const keeperBoostDetailEl = document.querySelector('#keeper-boost-detail')
 const resultTextEl = document.querySelector('#result-text')
 const resultDetailEl = document.querySelector('#result-detail')
 const historyListEl = document.querySelector('#history-list')
@@ -222,6 +304,22 @@ const aimNextButton = document.querySelector('#aim-next')
 const powerDownButton = document.querySelector('#power-down')
 const powerUpButton = document.querySelector('#power-up')
 const shootButton = document.querySelector('#shoot-button')
+const quizSubjectEl = document.querySelector('#quiz-subject')
+const keeperBoostEl = document.querySelector('#keeper-boost')
+const questionTextEl = document.querySelector('#question-text')
+const answerButtonsEl = document.querySelector('#answer-buttons')
+const quizFeedbackEl = document.querySelector('#quiz-feedback')
+
+function shuffleArray(items) {
+  const next = [...items]
+
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[next[index], next[swapIndex]] = [next[swapIndex], next[index]]
+  }
+
+  return next
+}
 
 function getZone(index = state.aimIndex) {
   return zones[index]
@@ -229,6 +327,13 @@ function getZone(index = state.aimIndex) {
 
 function setKeeperProfile() {
   state.keeperProfile = keeperProfiles[(state.shotNumber - 1) % keeperProfiles.length]
+}
+
+function setCurrentQuestion() {
+  state.currentQuestion = state.quizDeck[state.history.length] ?? null
+  state.selectedChoice = null
+  state.answerResolved = false
+  state.lastAnswerCorrect = null
 }
 
 function clampPower(nextPower) {
@@ -242,17 +347,78 @@ function getPowerAccuracyModifier(power) {
   return 0
 }
 
+function getKeeperBoostPenalty() {
+  return Math.min(0.26, state.keeperBoost * 0.05)
+}
+
 function estimateShotQuality(zone, power) {
-  const base = 0.78 - zone.risk - getPowerAccuracyModifier(power)
+  const base = 0.78 - zone.risk - getPowerAccuracyModifier(power) - getKeeperBoostPenalty()
   const profile = state.keeperProfile
   const biasRank = profile.bias.indexOf(zone.id)
-  const biasPenalty = biasRank === -1 ? 0 : (6 - biasRank) * 0.04
-  const scoreChance = Math.max(0.08, Math.min(0.9, base + 0.18 - biasPenalty))
+  const biasPenalty = (biasRank === -1 ? 0 : (6 - biasRank) * 0.04) + state.keeperBoost * 0.015
+  const scoreChance = Math.max(0.06, Math.min(0.9, base + 0.18 - biasPenalty))
 
   return {
     scoreChance,
     biasRank,
   }
+}
+
+function renderAnswers() {
+  const question = state.currentQuestion
+
+  if (!question) {
+    answerButtonsEl.innerHTML = ''
+    return
+  }
+
+  answerButtonsEl.innerHTML = question.choices
+    .map((choice, index) => {
+      const classes = ['answer-button']
+
+      if (state.answerResolved && index === state.selectedChoice) {
+        classes.push(state.lastAnswerCorrect ? 'correct' : 'wrong')
+      }
+
+      if (state.answerResolved && index === question.answerIndex) {
+        classes.push('reveal')
+      }
+
+      const disabled = state.answerResolved ? 'disabled' : ''
+      return `<button class="${classes.join(' ')}" data-answer-index="${index}" type="button" ${disabled}>${index + 1}. ${choice}</button>`
+    })
+    .join('')
+
+  ;[...answerButtonsEl.querySelectorAll('.answer-button')].forEach((button) => {
+    button.addEventListener('click', () => {
+      resolveAnswer(Number(button.dataset.answerIndex))
+    })
+  })
+}
+
+function renderQuiz() {
+  const question = state.currentQuestion
+
+  if (!question) {
+    quizSubjectEl.textContent = '全ラウンド終了'
+    questionTextEl.textContent = '5本のチャレンジが終わりました。もう一度遊ぶで新しいクイズに挑戦できます。'
+    quizFeedbackEl.textContent = 'キーパー強化は次の試合でリセットされます。'
+    renderAnswers()
+    return
+  }
+
+  quizSubjectEl.textContent = `${question.subject}クイズ`
+  questionTextEl.textContent = `Q${state.shotNumber}. ${question.question}`
+
+  if (!state.answerResolved) {
+    quizFeedbackEl.textContent = '先に答えを選んでください。正解ならそのまま勝負、不正解ならキーパーが強くなります。'
+  } else if (state.lastAnswerCorrect) {
+    quizFeedbackEl.textContent = `正解。${question.explanation}`
+  } else {
+    quizFeedbackEl.textContent = `不正解。${question.explanation} キーパー強化で反応が上がりました。`
+  }
+
+  renderAnswers()
 }
 
 function renderHud() {
@@ -274,14 +440,21 @@ function renderHud() {
   aimLabelEl.textContent = zone.label
   keeperNameEl.textContent = state.keeperProfile.name
   powerLabelEl.textContent = String(state.power)
+  keeperBoostEl.textContent = `Lv.${state.keeperBoost}`
   successNoteEl.textContent = `予想成功率 ${percent}%。${biasText}`
   coachTipEl.textContent = `${zone.label}へ ${state.power}% で蹴る作戦です。`
   coachDetailEl.textContent = zone.learning
   keeperHintEl.textContent = state.keeperProfile.hint
+  keeperBoostDetailEl.textContent =
+    state.keeperBoost === 0
+      ? 'まだ強化されていません。まずは正解を続けて主導権を握りましょう。'
+      : `現在は Lv.${state.keeperBoost}。不正解のぶんだけ反応が鋭くなり、読まれやすくなっています。`
 
   zoneButtons.forEach((button, index) => {
     button.classList.toggle('active', index === state.aimIndex)
   })
+
+  keeperEl.style.setProperty('--keeper-scale', String(1 + state.keeperBoost * 0.08))
 }
 
 function renderHistory() {
@@ -292,7 +465,8 @@ function renderHistory() {
 
   historyListEl.innerHTML = state.history
     .map(
-      (entry) => `<li><strong>${entry.label}</strong> ${entry.outcome}。${entry.note}</li>`,
+      (entry) =>
+        `<li><strong>${entry.label}</strong> ${entry.quizOutcome}。${entry.outcome}。${entry.note}</li>`,
     )
     .join('')
 }
@@ -306,16 +480,20 @@ function resetActors() {
   keeperEl.style.left = '50%'
   keeperEl.style.top = '56%'
   keeperEl.className = 'keeper'
+  keeperEl.style.setProperty('--keeper-scale', String(1 + state.keeperBoost * 0.08))
 }
 
 function chooseKeeperDive(targetZone) {
   const profile = state.keeperProfile
   const weightedChoice = Math.random()
+  const focusBoost = Math.min(0.18, state.keeperBoost * 0.04)
+  const secondBoost = Math.min(0.1, state.keeperBoost * 0.02)
+  const directReadBoost = Math.min(0.16, state.keeperBoost * 0.03)
 
-  if (weightedChoice < 0.48) return profile.bias[0]
-  if (weightedChoice < 0.78) return profile.bias[1]
-  if (weightedChoice < 0.9) return profile.bias[2]
-  if (weightedChoice < 0.95) return targetZone.id
+  if (weightedChoice < 0.48 + focusBoost) return profile.bias[0]
+  if (weightedChoice < 0.78 + focusBoost + secondBoost) return profile.bias[1]
+  if (weightedChoice < 0.9 + secondBoost) return profile.bias[2]
+  if (weightedChoice < 0.95 + directReadBoost) return targetZone.id
 
   return profile.bias[Math.floor(Math.random() * profile.bias.length)]
 }
@@ -340,16 +518,33 @@ function finishMatchIfNeeded() {
     return
   }
 
-  let verdict = 'コースの使い分けを続けると、もっと決定率を上げられます。'
+  let verdict = 'クイズとコース選びを両立できるようになると、さらに安定して決められます。'
 
   if (state.goals >= 4) {
-    verdict = 'すばらしいPK名人です。キーパーの傾向を見ながら落ち着いて決められました。'
+    verdict = 'すばらしいです。学びと読み合いの両方でキーパーを上回りました。'
   } else if (state.goals >= 2) {
-    verdict = '読み合いはできています。次は苦手なコースにも挑戦するとさらに良くなります。'
+    verdict = 'あと一歩です。クイズでの正解を増やせば、キーパーを強化させずに有利に進められます。'
   }
 
   resultTextEl.textContent = `試合終了 ${state.goals} / ${state.maxShots}本成功`
   resultDetailEl.textContent = verdict
+}
+
+function resolveAnswer(choiceIndex) {
+  if (state.busy || state.answerResolved || !state.currentQuestion) {
+    return
+  }
+
+  state.selectedChoice = choiceIndex
+  state.answerResolved = true
+  state.lastAnswerCorrect = choiceIndex === state.currentQuestion.answerIndex
+
+  if (!state.lastAnswerCorrect) {
+    state.keeperBoost += 1
+  }
+
+  renderQuiz()
+  renderHud()
 }
 
 function takeShot() {
@@ -357,11 +552,19 @@ function takeShot() {
     return
   }
 
+  if (!state.answerResolved || !state.currentQuestion) {
+    resultTextEl.textContent = '先にクイズへ答えてください。'
+    resultDetailEl.textContent = '4つの選択肢から1つ選ぶと、そのラウンドのキーパー強化が確定します。'
+    return
+  }
+
   state.busy = true
 
   const zone = getZone()
+  const question = state.currentQuestion
+  const answerWasCorrect = state.lastAnswerCorrect
   const { scoreChance, biasRank } = estimateShotQuality(zone, state.power)
-  const missChance = zone.risk + getPowerAccuracyModifier(state.power)
+  const missChance = zone.risk + getPowerAccuracyModifier(state.power) + state.keeperBoost * 0.01
   const roll = Math.random()
   const keeperDive = chooseKeeperDive(zone)
   const keeperReadsShot = keeperDive === zone.id
@@ -396,17 +599,26 @@ function takeShot() {
           : 'コースは悪くありませんでしたが、相手の反応が少し上回りました。'
     }
 
+    const quizOutcome = answerWasCorrect
+      ? `クイズ正解 (${question.subject})`
+      : `クイズ不正解 (${question.subject})`
+
     state.history.unshift({
       label: `${state.shotNumber}本目: ${zone.label} / ${state.power}%`,
+      quizOutcome,
       outcome,
       note,
     })
 
-    resultTextEl.textContent = `${state.shotNumber}本目は${outcome}。`
-    resultDetailEl.textContent = note
+    resultTextEl.textContent = `${state.shotNumber}本目は${quizOutcome}、シュートは${outcome}。`
+    resultDetailEl.textContent = answerWasCorrect
+      ? `${question.explanation} ${note}`
+      : `${question.explanation} 不正解でキーパーが強化された状態でした。${note}`
 
     state.shotNumber += 1
     setKeeperProfile()
+    setCurrentQuestion()
+    renderQuiz()
     renderHud()
     renderHistory()
     finishMatchIfNeeded()
@@ -426,12 +638,16 @@ function resetGame() {
   state.power = 72
   state.busy = false
   state.history = []
+  state.keeperBoost = 0
+  state.quizDeck = shuffleArray(quizBank).slice(0, state.maxShots)
   setKeeperProfile()
+  setCurrentQuestion()
   resetActors()
+  renderQuiz()
   renderHud()
   renderHistory()
-  resultTextEl.textContent = '1本目が始まります。まずはキーパーの傾向を読んでみましょう。'
-  resultDetailEl.textContent = '高い所は止めにくいですが、リスクもあります。低い所は安定しやすいです。'
+  resultTextEl.textContent = '1本目が始まります。まずはクイズに答えて、キーパーの傾向も読んでみましょう。'
+  resultDetailEl.textContent = '正解なら有利なまま攻められます。不正解だとキーパーが強くなります。'
 }
 
 function updateAim(direction) {
