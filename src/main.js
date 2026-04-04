@@ -196,6 +196,15 @@ const auraTextEl = document.querySelector('#aura-text')
 const boostTextEl = document.querySelector('#boost-text')
 const historyListEl = document.querySelector('#history-list')
 const resetButton = document.querySelector('#reset-button')
+const playerStickmanEl = document.querySelector('.player-stickman')
+const enemyStickmanEl = document.querySelector('.enemy-stickman')
+
+function animateFighter(element, className, duration = 320) {
+  element.classList.remove(className)
+  void element.offsetWidth
+  element.classList.add(className)
+  window.setTimeout(() => element.classList.remove(className), duration)
+}
 
 function shuffleArray(items) {
   const next = [...items]
@@ -279,6 +288,8 @@ function renderHud() {
 function enemyTurn() {
   const move = enemyMoves[Math.floor(Math.random() * enemyMoves.length)]
   state.playerHp = Math.max(0, state.playerHp - move.damage)
+  animateFighter(enemyStickmanEl, 'attack')
+  animateFighter(playerStickmanEl, 'hit')
   playerStateEl.textContent = `${move.damage} ダメージを受けた。`
   enemyStateEl.textContent = move.text
   battleStatusEl.textContent = `相手の反撃: ${move.name}`
@@ -316,8 +327,11 @@ function performTurn(moveId) {
   state.busy = true
   const totalDamage = move.damage + state.boostAmount
   state.enemyHp = Math.max(0, state.enemyHp - totalDamage)
+  animateFighter(playerStickmanEl, move.id === 'kick' ? 'kick' : 'attack')
+  animateFighter(enemyStickmanEl, 'hit')
   if (move.heal) {
     state.playerHp = Math.min(state.maxHp, state.playerHp + move.heal)
+    animateFighter(playerStickmanEl, 'guard')
   }
 
   state.aura = move.aura

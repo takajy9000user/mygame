@@ -185,6 +185,22 @@ h1 {
 .player-stickman { color: #38bdf8; }
 .enemy-stickman { color: #fb7185; }
 
+.stickman.attack {
+  animation: punch 320ms ease;
+}
+
+.stickman.kick {
+  animation: kick 360ms ease;
+}
+
+.stickman.guard {
+  animation: guard 340ms ease;
+}
+
+.stickman.hit {
+  animation: hit 320ms ease;
+}
+
 .hp-bar {
   margin-top: 14px;
   width: 100%;
@@ -286,6 +302,30 @@ h1 {
   padding-left: 18px;
   display: grid;
   gap: 10px;
+}
+
+@keyframes punch {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(18px) rotate(-4deg); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes kick {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(16px) rotate(-8deg) scale(1.03); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes guard {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-8px) scale(1.02); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes hit {
+  0% { transform: translateX(0); opacity: 1; }
+  30% { transform: translateX(-14px); opacity: 0.82; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
 @media (max-width: 920px) {
