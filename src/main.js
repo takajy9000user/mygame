@@ -2,24 +2,28 @@ import './style.css'
 
 const quizBank = [
   {
+    subject: '算数',
     question: '8 × 7 はいくつ？',
     choices: ['54', '56', '63', '58'],
     answerIndex: 1,
     explanation: '8 × 7 = 56 です。',
   },
   {
+    subject: '社会',
     question: '日本の首都はどこ？',
     choices: ['大阪', '東京', '京都', '福岡'],
     answerIndex: 1,
     explanation: '日本の首都は東京です。',
   },
   {
+    subject: '理科',
     question: '水がこおる温度は何℃？',
     choices: ['10℃', '0℃', '5℃', '100℃'],
     answerIndex: 1,
     explanation: '水は 0℃ でこおり始めます。',
   },
   {
+    subject: '国語',
     question: '「努力」に近い意味の言葉はどれ？',
     choices: ['なまける', '力をつくす', 'ねむる', 'あそぶ'],
     answerIndex: 1,
@@ -53,6 +57,8 @@ const state = {
   currentQuestion: null,
   quizOpen: false,
   quizDeck: [],
+  studyStreak: 0,
+  learnedCount: 0,
 }
 
 const app = document.querySelector('#app')
@@ -61,11 +67,11 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Stick Battle Quiz</p>
-        <h1>棒人間バトルゲーム</h1>
+        <p class="eyebrow">Fun Study Battle</p>
+        <h1>楽しく学べる 棒人間バトル</h1>
         <p class="intro">
-          棒人間どうしの1対1バトルです。攻撃前にクイズへ挑戦するかは自分で選べます。
-          <strong>クイズに正解すると、その次の攻撃力がアップします。</strong>
+          棒人間どうしの1対1バトルです。攻撃前に学びチャレンジへ挑戦するかは自分で選べます。
+          <strong>クイズに正解すると、その次の攻撃力がアップし、学びコンボも伸びます。</strong>
         </p>
       </div>
       <div class="score-card">
@@ -78,7 +84,7 @@ app.innerHTML = `
           <strong id="enemy-hp">120</strong>
         </div>
         <div>
-          <span>ターン</span>
+          <span>学びコンボ</span>
           <strong id="turn-count">1</strong>
         </div>
       </div>
@@ -134,13 +140,13 @@ app.innerHTML = `
         <div class="panel-head">
           <div>
             <p class="eyebrow">Action</p>
-            <h2>行動を選ぶ</h2>
+            <h2>楽しく進める</h2>
           </div>
         </div>
         <div id="moves-grid" class="skills-grid"></div>
         <div class="quiz-actions">
-          <button id="open-quiz-button" class="action-button primary" type="button">クイズに挑戦する</button>
-          <button id="skip-quiz-button" class="action-button secondary" type="button">クイズなしで戦う</button>
+          <button id="open-quiz-button" class="action-button primary" type="button">学びチャレンジ</button>
+          <button id="skip-quiz-button" class="action-button secondary" type="button">そのまま戦う</button>
         </div>
       </section>
     </section>
@@ -149,12 +155,12 @@ app.innerHTML = `
       <div class="panel-head">
         <div>
           <p class="eyebrow">Quiz Boost</p>
-          <h2>攻撃力アップクイズ</h2>
+          <h2>ごほうびクイズ</h2>
         </div>
       </div>
       <p id="quiz-question" class="quiz-question">クイズに挑戦すると、次の攻撃が強くなります。</p>
       <div id="quiz-answers" class="quiz-answers"></div>
-      <p id="quiz-feedback" class="quiz-feedback">挑戦するかどうかは自分で決められます。</p>
+      <p id="quiz-feedback" class="quiz-feedback">できた分だけ強くなります。わからなくても次に進めます。</p>
     </section>
 
     <section class="insight-grid">
@@ -169,8 +175,8 @@ app.innerHTML = `
         <p id="boost-text">今は通常ダメージです。</p>
       </article>
       <article class="insight-card">
-        <p class="eyebrow">Battle Log</p>
-        <h3>戦闘ログ</h3>
+        <p class="eyebrow">Study Log</p>
+        <h3>学びログ</h3>
         <ol id="history-list" class="history-list"></ol>
       </article>
     </section>
@@ -236,12 +242,12 @@ function setQuestion() {
 
 function renderQuiz() {
   if (!state.quizOpen || !state.currentQuestion) {
-    quizQuestionEl.textContent = 'クイズに挑戦すると、次の攻撃が強くなります。'
+    quizQuestionEl.textContent = '学びチャレンジに正解すると、次の攻撃が強くなります。'
     quizAnswersEl.innerHTML = ''
     return
   }
 
-  quizQuestionEl.textContent = state.currentQuestion.question
+  quizQuestionEl.textContent = `${state.currentQuestion.subject}クイズ: ${state.currentQuestion.question}`
   quizAnswersEl.innerHTML = state.currentQuestion.choices
     .map((choice, index) => `<button class="quiz-answer" data-index="${index}" type="button">${choice}</button>`)
     .join('')
@@ -272,12 +278,14 @@ function renderMoves() {
 function renderHud() {
   playerHpEl.textContent = String(state.playerHp)
   enemyHpEl.textContent = String(state.enemyHp)
-  turnCountEl.textContent = String(state.turn)
+  turnCountEl.textContent = state.studyStreak > 0 ? `${state.studyStreak}` : '0'
   playerBarEl.style.width = `${(state.playerHp / state.maxHp) * 100}%`
   enemyBarEl.style.width = `${(state.enemyHp / state.maxHp) * 100}%`
   auraTextEl.textContent = state.aura
   boostBadgeEl.textContent = state.boostReady ? `+${state.boostAmount}` : '通常'
-  boostTextEl.textContent = state.boostReady ? `次の攻撃は +${state.boostAmount} 強化されています。` : '今は通常ダメージです。'
+  boostTextEl.textContent = state.boostReady
+    ? `次の攻撃は +${state.boostAmount} 強化。これまでに ${state.learnedCount} 問学びました。`
+    : `今は通常ダメージ。これまでに ${state.learnedCount} 問学びました。`
   openQuizButton.disabled = state.battleOver || state.busy || state.quizOpen
   skipQuizButton.disabled = state.battleOver || state.busy
   renderMoves()
@@ -297,18 +305,18 @@ function enemyTurn() {
 
   if (state.playerHp <= 0) {
     state.battleOver = true
-    state.aura = '立て直せずに倒れた'
-    battleStatusEl.textContent = '敗北。次はクイズ強化も使ってみよう。'
+    state.aura = '今回は負けても、学びはちゃんと残る'
+    battleStatusEl.textContent = '敗北。次は学びチャレンジでもっと有利に進めよう。'
   }
 }
 
 function finishTurn() {
   if (state.enemyHp <= 0) {
     state.battleOver = true
-    state.aura = '最後まで押し切って勝利した'
+    state.aura = '学びの力で最後まで押し切った'
     playerStateEl.textContent = '拳を下ろして勝負あり。'
     enemyStateEl.textContent = 'その場に倒れ込んだ。'
-    battleStatusEl.textContent = '勝利。棒人間バトルに勝った。'
+    battleStatusEl.textContent = '勝利。楽しく学びながら勝ち切った。'
     renderHud()
     return
   }
@@ -343,7 +351,7 @@ function performTurn(moveId) {
   state.boostReady = false
   state.boostAmount = 0
   state.quizOpen = false
-  quizFeedbackEl.textContent = '挑戦するかどうかは自分で決められます。'
+  quizFeedbackEl.textContent = '次も気が向いたら学びチャレンジに挑戦できます。'
 
   renderHud()
 
@@ -360,13 +368,16 @@ function answerQuiz(index) {
   if (correct) {
     state.boostReady = true
     state.boostAmount = 8
+    state.studyStreak += 1
+    state.learnedCount += 1
     quizFeedbackEl.textContent = `正解。${state.currentQuestion.explanation} 次の攻撃が +8 強化されます。`
-    addHistory('クイズ正解で次の攻撃が強化された')
+    addHistory(`${state.currentQuestion.subject}クイズ正解で攻撃アップ`)
   } else {
     state.boostReady = false
     state.boostAmount = 0
+    state.studyStreak = 0
     quizFeedbackEl.textContent = `不正解。${state.currentQuestion.explanation} 今回は通常ダメージです。`
-    addHistory('クイズ不正解で強化なし')
+    addHistory(`${state.currentQuestion.subject}クイズは惜しい。説明を見て次へ`)
   }
 
   state.quizOpen = false
@@ -377,14 +388,14 @@ function openQuiz() {
   if (state.battleOver || state.busy || state.quizOpen) return
   setQuestion()
   state.quizOpen = true
-  quizFeedbackEl.textContent = '正解すると次の攻撃力がアップします。'
+  quizFeedbackEl.textContent = '正解すると次の攻撃力がアップします。気楽に挑戦できます。'
   renderHud()
 }
 
 function skipQuiz() {
   if (state.battleOver || state.busy) return
   state.quizOpen = false
-  quizFeedbackEl.textContent = 'クイズなしでそのまま戦えます。'
+  quizFeedbackEl.textContent = '今はそのまま戦います。あとでまた挑戦できます。'
   renderHud()
 }
 
@@ -401,11 +412,13 @@ function resetBattle() {
   state.aura = '様子を見ながら間合いを測る'
   state.currentQuestion = null
   state.quizOpen = false
+  state.studyStreak = 0
+  state.learnedCount = 0
   refillQuizDeck()
   playerStateEl.textContent = 'かまえて様子を見ている。'
   enemyStateEl.textContent = '腕を回して挑発している。'
   battleStatusEl.textContent = '最初の一手を選んでください。'
-  quizFeedbackEl.textContent = '挑戦するかどうかは自分で決められます。'
+  quizFeedbackEl.textContent = 'できた分だけ強くなります。わからなくても次に進めます。'
   renderHud()
 }
 
