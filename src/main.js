@@ -3,69 +3,69 @@ import './style.css'
 const zones = [
   {
     id: 'top-left',
-    label: '左上',
+    label: '左上の結界',
     x: 18,
     y: 20,
     risk: 0.44,
-    learning: '左上は止めにくい反面、強く蹴りすぎると外れやすいコースです。',
+    learning: '左上の結界は破りやすい反面、術式を強く流しすぎると外れやすい狙い目です。',
   },
   {
     id: 'top-center',
-    label: '上中央',
+    label: '上中央の結界',
     x: 50,
     y: 18,
     risk: 0.62,
-    learning: '上中央は迫力がありますが、力加減が難しい上級者向けです。',
+    learning: '上中央は派手に決められますが、呪力の加減が難しい上級者向けの一点です。',
   },
   {
     id: 'top-right',
-    label: '右上',
+    label: '右上の結界',
     x: 82,
     y: 20,
     risk: 0.44,
-    learning: '右上は人気のコースです。角度は良いですが、強すぎると外れやすくなります。',
+    learning: '右上の結界は角度が良く、のろいの守りを崩しやすいですが、強すぎると乱れます。',
   },
   {
     id: 'bottom-left',
-    label: '左下',
+    label: '左下の結界',
     x: 20,
     y: 66,
     risk: 0.2,
-    learning: '左下は安定しやすいコースです。コントロール重視で決めやすくなります。',
+    learning: '左下の結界は安定して狙えます。落ち着いて呪具を投げ込むと成功しやすいです。',
   },
   {
     id: 'bottom-center',
-    label: '下中央',
+    label: '下中央の結界',
     x: 50,
     y: 68,
     risk: 0.5,
-    learning: '下中央は読みやすいので、キーパーの動きを見て使い分けるのが大切です。',
+    learning: '下中央は敵に読まれやすいので、のろいの動きを見て使い分けるのが大切です。',
   },
   {
     id: 'bottom-right',
-    label: '右下',
+    label: '右下の結界',
     x: 80,
     y: 66,
     risk: 0.2,
-    learning: '右下も安定しやすいコースです。落ち着いて狙うと成功しやすくなります。',
+    learning: '右下の結界も安定しています。呪力を整えて狙うと封印が決まりやすいです。',
   },
 ]
 
 const keeperProfiles = [
   {
-    name: 'かがみ型',
+    name: 'のろい鏡面型',
     bias: ['bottom-left', 'bottom-right', 'top-left', 'top-right', 'bottom-center', 'top-center'],
-    hint: '低いシュートによく反応します。高いコースは比較的空きやすいです。',
+    hint: '低い軌道の呪具によく反応します。高い結界は比較的ほころびやすいです。',
   },
   {
-    name: '読み勝ち型',
+    name: '先読み呪霊型',
     bias: ['top-right', 'bottom-right', 'top-left', 'bottom-left', 'bottom-center', 'top-center'],
-    hint: '右側を先に読むタイプです。反対側へ打つと決まりやすくなります。',
+    hint: '右側の気配を先に読みます。逆側へ術を通すと破りやすくなります。',
   },
   {
-    name: '中央待ち型',
+    name: '結界待ち伏せ型',
     bias: ['bottom-center', 'top-center', 'bottom-left', 'bottom-right', 'top-left', 'top-right'],
-    hint: 'まず中央を固めます。左右の角を狙うとチャンスです。',
+    hint: 'まず中央の守りを固めます。左右の角の結界が狙い目です。',
   },
 ]
 
@@ -152,23 +152,23 @@ app.innerHTML = `
   <main class="game-shell">
     <section class="hero-panel">
       <div>
-        <p class="eyebrow">Quiz Penalty Keeper</p>
-        <h1>クイズに答えて PK を決めよう</h1>
+        <p class="eyebrow">Occult Quiz Battle</p>
+        <h1>クイズで術式を選び のろいを祓おう</h1>
         <p class="intro">
-          日本の小学生高学年向けの4択クイズに答えてからシュート。<strong>間違えるたびにキーパーが強くなり、読みも反応もどんどん鋭くなります。</strong>
+          日本の小学生高学年向けの4択クイズで術式を発動し、結界の弱点へ呪具を投げ込みます。<strong>間違えるたびに守りののろいが強くなり、読みも反応もどんどん鋭くなります。</strong>
         </p>
       </div>
       <div class="score-card">
         <div>
-          <span>ゴール</span>
+          <span>祓い成功</span>
           <strong id="score">0</strong>
         </div>
         <div>
-          <span>セーブ</span>
+          <span>防がれた数</span>
           <strong id="saves">0</strong>
         </div>
         <div>
-          <span>残り</span>
+          <span>残る任務</span>
           <strong id="shots-left">5</strong>
         </div>
       </div>
@@ -177,15 +177,15 @@ app.innerHTML = `
     <section class="stadium-card">
       <div class="stadium-head">
         <div>
-          <p class="label">今のねらい</p>
-          <h2 id="aim-label">右下</h2>
+          <p class="label">狙う結界</p>
+          <h2 id="aim-label">右下の結界</h2>
         </div>
         <div>
-          <p class="label">キーパーのタイプ</p>
-          <h2 id="keeper-name">かがみ型</h2>
+          <p class="label">のろいの型</p>
+          <h2 id="keeper-name">のろい鏡面型</h2>
         </div>
         <div>
-          <p class="label">キック強さ</p>
+          <p class="label">呪力出力</p>
           <h2><span id="power-label">72</span>%</h2>
         </div>
       </div>
@@ -194,16 +194,16 @@ app.innerHTML = `
         <div class="quiz-head">
           <div>
             <p class="eyebrow">Quiz Mission</p>
-            <h3 id="quiz-subject">算数</h3>
+            <h3 id="quiz-subject">算数術式</h3>
           </div>
           <div class="keeper-boost-box">
-            <p class="label">キーパー強化</p>
+            <p class="label">のろい強化</p>
             <strong id="keeper-boost">Lv.0</strong>
           </div>
         </div>
         <p id="question-text" class="question-text"></p>
         <div id="answer-buttons" class="answer-grid"></div>
-        <p id="quiz-feedback" class="quiz-feedback">答えを選ぶと結果が出ます。正解ならそのまま攻め、不正解ならキーパーが強化されます。</p>
+        <p id="quiz-feedback" class="quiz-feedback">答えを選ぶと術式判定が出ます。正解ならそのまま攻め、不正解なら守りののろいが強化されます。</p>
       </section>
 
       <div class="pitch">
@@ -225,21 +225,21 @@ app.innerHTML = `
 
       <div class="stadium-actions">
         <div class="mobile-controls" aria-label="タッチ操作パネル">
-          <button id="aim-prev" class="action-button secondary" type="button">ねらい ←</button>
-          <button id="power-down" class="action-button secondary" type="button">パワー -</button>
-          <button id="shoot-button" class="action-button primary" type="button">答えてシュート</button>
-          <button id="power-up" class="action-button secondary" type="button">パワー +</button>
-          <button id="aim-next" class="action-button secondary" type="button">ねらい →</button>
+          <button id="aim-prev" class="action-button secondary" type="button">結界 ←</button>
+          <button id="power-down" class="action-button secondary" type="button">呪力 -</button>
+          <button id="shoot-button" class="action-button primary" type="button">答えて祓う</button>
+          <button id="power-up" class="action-button secondary" type="button">呪力 +</button>
+          <button id="aim-next" class="action-button secondary" type="button">結界 →</button>
         </div>
 
         <div class="control-row">
           <div class="control-box">
             <p class="label">操作</p>
-            <p>4択クイズに答えてから、ゴール内をタップしてコースを選び、強さを調整してシュートします。</p>
+            <p>4択クイズに答えてから、結界の弱点をタップして狙いを決め、呪力を調整して祓います。</p>
           </div>
           <div class="control-box">
-            <p class="label">成功メモ</p>
-            <p id="success-note">右下は安定しやすいコースです。キーパーが中央に強いときに有効です。</p>
+            <p class="label">術式メモ</p>
+            <p id="success-note">右下の結界は安定して狙えます。敵が中央を守るときに有効です。</p>
           </div>
         </div>
       </div>
@@ -247,34 +247,34 @@ app.innerHTML = `
 
     <section class="insight-grid">
       <article class="insight-card coach-card">
-        <p class="eyebrow">Coach Note</p>
-        <h3>コーチの学び</h3>
+        <p class="eyebrow">Master Note</p>
+        <h3>先生の助言</h3>
         <p id="coach-tip"></p>
         <p id="coach-detail" class="detail"></p>
       </article>
 
       <article class="insight-card">
-        <p class="eyebrow">Scout Report</p>
-        <h3>相手の傾向</h3>
+        <p class="eyebrow">Curse Report</p>
+        <h3>のろいの傾向</h3>
         <p id="keeper-hint"></p>
         <p id="keeper-boost-detail" class="detail"></p>
       </article>
 
       <article class="insight-card">
-        <p class="eyebrow">Last Shot</p>
-        <h3>前回の結果</h3>
-        <p id="result-text">1本目が始まります。まずはクイズに答えて、キーパーの傾向も読んでみましょう。</p>
-        <p id="result-detail" class="detail">正解なら落ち着いて狙えます。不正解だとキーパーが強化されて厳しくなります。</p>
+        <p class="eyebrow">Last Battle</p>
+        <h3>前回の祓い結果</h3>
+        <p id="result-text">1戦目が始まります。まずはクイズに答えて、のろいの傾向も読んでみましょう。</p>
+        <p id="result-detail" class="detail">正解なら有利に祓えます。不正解だと守りののろいが強化されます。</p>
       </article>
     </section>
 
     <section class="history-card">
       <div class="history-head">
         <div>
-          <p class="eyebrow">Round Log</p>
-          <h3>プレーログ</h3>
+          <p class="eyebrow">Battle Log</p>
+          <h3>任務ログ</h3>
         </div>
-        <button id="reset-button" class="reset-button" type="button">もう一度遊ぶ</button>
+        <button id="reset-button" class="reset-button" type="button">もう一度任務へ</button>
       </div>
       <ol id="history-list" class="history-list"></ol>
     </section>
@@ -400,22 +400,22 @@ function renderQuiz() {
   const question = state.currentQuestion
 
   if (!question) {
-    quizSubjectEl.textContent = '全ラウンド終了'
-    questionTextEl.textContent = '5本のチャレンジが終わりました。もう一度遊ぶで新しいクイズに挑戦できます。'
-    quizFeedbackEl.textContent = 'キーパー強化は次の試合でリセットされます。'
+    quizSubjectEl.textContent = '全任務終了'
+    questionTextEl.textContent = '5回の祓い任務が終わりました。もう一度任務へで新しいクイズに挑戦できます。'
+    quizFeedbackEl.textContent = 'のろい強化は次の任務でリセットされます。'
     renderAnswers()
     return
   }
 
-  quizSubjectEl.textContent = `${question.subject}クイズ`
+  quizSubjectEl.textContent = `${question.subject}術式`
   questionTextEl.textContent = `Q${state.shotNumber}. ${question.question}`
 
   if (!state.answerResolved) {
-    quizFeedbackEl.textContent = '先に答えを選んでください。正解ならそのまま勝負、不正解ならキーパーが強くなります。'
+    quizFeedbackEl.textContent = '先に答えを選んでください。正解ならそのまま祓えます。不正解なら守りののろいが強くなります。'
   } else if (state.lastAnswerCorrect) {
     quizFeedbackEl.textContent = `正解。${question.explanation}`
   } else {
-    quizFeedbackEl.textContent = `不正解。${question.explanation} キーパー強化で反応が上がりました。`
+    quizFeedbackEl.textContent = `不正解。${question.explanation} のろい強化で防御が上がりました。`
   }
 
   renderAnswers()
@@ -426,12 +426,12 @@ function renderHud() {
   const { scoreChance, biasRank } = estimateShotQuality(zone, state.power)
   const percent = Math.round(scoreChance * 100)
 
-  let biasText = '読み合いになりやすいコースです。強さとのバランスが大切です。'
+  let biasText = '読み合いになりやすい結界です。呪力とのバランスが大切です。'
 
   if (biasRank <= 1) {
-    biasText = 'キーパーが読みやすいコースです。反対側を狙うと成功率が上がります。'
+    biasText = '敵が読みやすい結界です。反対側を狙うと成功率が上がります。'
   } else if (biasRank >= 4) {
-    biasText = 'キーパーの意識が薄いコースです。読み勝ちしやすい狙い目です。'
+    biasText = '敵の意識が薄い結界です。読み勝ちしやすい狙い目です。'
   }
 
   scoreEl.textContent = String(state.goals)
@@ -442,13 +442,13 @@ function renderHud() {
   powerLabelEl.textContent = String(state.power)
   keeperBoostEl.textContent = `Lv.${state.keeperBoost}`
   successNoteEl.textContent = `予想成功率 ${percent}%。${biasText}`
-  coachTipEl.textContent = `${zone.label}へ ${state.power}% で蹴る作戦です。`
+  coachTipEl.textContent = `${zone.label}へ 呪力 ${state.power}% で呪具を通す作戦です。`
   coachDetailEl.textContent = zone.learning
   keeperHintEl.textContent = state.keeperProfile.hint
   keeperBoostDetailEl.textContent =
     state.keeperBoost === 0
-      ? 'まだ強化されていません。まずは正解を続けて主導権を握りましょう。'
-      : `現在は Lv.${state.keeperBoost}。不正解のぶんだけ反応が鋭くなり、読まれやすくなっています。`
+      ? 'まだ強化されていません。正解を続けて術式の主導権を握りましょう。'
+      : `現在は Lv.${state.keeperBoost}。不正解のぶんだけ守りが鋭くなり、読まれやすくなっています。`
 
   zoneButtons.forEach((button, index) => {
     button.classList.toggle('active', index === state.aimIndex)
@@ -459,7 +459,7 @@ function renderHud() {
 
 function renderHistory() {
   if (state.history.length === 0) {
-    historyListEl.innerHTML = '<li>まだシュートはありません。</li>'
+    historyListEl.innerHTML = '<li>まだ祓いはありません。</li>'
     return
   }
 
@@ -518,15 +518,15 @@ function finishMatchIfNeeded() {
     return
   }
 
-  let verdict = 'クイズとコース選びを両立できるようになると、さらに安定して決められます。'
+  let verdict = 'クイズと結界選びを両立できるようになると、さらに安定して祓えます。'
 
   if (state.goals >= 4) {
-    verdict = 'すばらしいです。学びと読み合いの両方でキーパーを上回りました。'
+    verdict = 'すばらしいです。学びと読み合いの両方でのろいを上回りました。'
   } else if (state.goals >= 2) {
-    verdict = 'あと一歩です。クイズでの正解を増やせば、キーパーを強化させずに有利に進められます。'
+    verdict = 'あと一歩です。クイズ正解を増やせば、のろいを強化させずに有利に進められます。'
   }
 
-  resultTextEl.textContent = `試合終了 ${state.goals} / ${state.maxShots}本成功`
+  resultTextEl.textContent = `任務完了 ${state.goals} / ${state.maxShots}回 祓い成功`
   resultDetailEl.textContent = verdict
 }
 
@@ -554,7 +554,7 @@ function takeShot() {
 
   if (!state.answerResolved || !state.currentQuestion) {
     resultTextEl.textContent = '先にクイズへ答えてください。'
-    resultDetailEl.textContent = '4つの選択肢から1つ選ぶと、そのラウンドのキーパー強化が確定します。'
+    resultDetailEl.textContent = '4つの選択肢から1つ選ぶと、その任務でののろい強化が確定します。'
     return
   }
 
@@ -575,45 +575,45 @@ function takeShot() {
   window.setTimeout(() => moveKeeper(keeperDive), 120)
 
   window.setTimeout(() => {
-    let outcome = 'ゴール'
+    let outcome = '祓い成功'
     let note = ''
 
     if (isMiss) {
-      outcome = 'ミス'
+      outcome = '術式ミス'
       note =
         state.power >= 88
-          ? '強く蹴りすぎて外れました。高いコースでは力加減が特に大切です。'
-          : 'コースは良かったですが、少しだけずれました。'
+          ? '呪力を流しすぎて術式が乱れました。高い結界では力加減が特に大切です。'
+          : '狙いは良かったですが、術式が少しだけずれました。'
     } else if (isGoal) {
       state.goals += 1
       note =
         biasRank >= 3
-          ? 'キーパーの逆を取れました。読み勝ちできたナイスシュートです。'
-          : '狙いと強さがかみ合いました。落ち着いて決められました。'
+          ? 'のろいの逆を取れました。読み勝ちできた見事な祓いです。'
+          : '狙いと呪力がかみ合いました。落ち着いて祓えました。'
     } else {
       state.saves += 1
-      outcome = 'セーブ'
+      outcome = '防がれた'
       note =
         keeperReadsShot
-          ? 'キーパーに読まれました。次は反対のコースも試してみましょう。'
-          : 'コースは悪くありませんでしたが、相手の反応が少し上回りました。'
+          ? 'のろいに読まれました。次は反対側の結界も試してみましょう。'
+          : '狙いは悪くありませんでしたが、相手の反応が少し上回りました。'
     }
 
     const quizOutcome = answerWasCorrect
-      ? `クイズ正解 (${question.subject})`
-      : `クイズ不正解 (${question.subject})`
+      ? `術式正解 (${question.subject})`
+      : `術式不正解 (${question.subject})`
 
     state.history.unshift({
-      label: `${state.shotNumber}本目: ${zone.label} / ${state.power}%`,
+      label: `${state.shotNumber}戦目: ${zone.label} / 呪力 ${state.power}%`,
       quizOutcome,
       outcome,
       note,
     })
 
-    resultTextEl.textContent = `${state.shotNumber}本目は${quizOutcome}、シュートは${outcome}。`
+    resultTextEl.textContent = `${state.shotNumber}戦目は${quizOutcome}、結果は${outcome}。`
     resultDetailEl.textContent = answerWasCorrect
       ? `${question.explanation} ${note}`
-      : `${question.explanation} 不正解でキーパーが強化された状態でした。${note}`
+      : `${question.explanation} 不正解でのろいが強化された状態でした。${note}`
 
     state.shotNumber += 1
     setKeeperProfile()
@@ -646,8 +646,8 @@ function resetGame() {
   renderQuiz()
   renderHud()
   renderHistory()
-  resultTextEl.textContent = '1本目が始まります。まずはクイズに答えて、キーパーの傾向も読んでみましょう。'
-  resultDetailEl.textContent = '正解なら有利なまま攻められます。不正解だとキーパーが強くなります。'
+  resultTextEl.textContent = '1戦目が始まります。まずはクイズに答えて、のろいの傾向も読んでみましょう。'
+  resultDetailEl.textContent = '正解なら有利なまま祓えます。不正解だとのろいが強くなります。'
 }
 
 function updateAim(direction) {
