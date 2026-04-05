@@ -3,6 +3,7 @@ import './style.css'
 const quizBank = [
   {
     era: '旧石器時代',
+    card: 'ナウマンゾウ',
     question: '旧石器時代の人々が主に使っていた道具はどれ？',
     choices: ['土器', '打製石器', '鉄砲', '木簡'],
     answerIndex: 1,
@@ -10,6 +11,7 @@ const quizBank = [
   },
   {
     era: '旧石器時代',
+    card: '港川人',
     question: '旧石器時代の人々のくらしに近いものはどれ？',
     choices: ['稲作中心の生活', '狩りや採集の生活', '城下町での商売', '工場で働く生活'],
     answerIndex: 1,
@@ -17,6 +19,7 @@ const quizBank = [
   },
   {
     era: '縄文時代',
+    card: '縄文人',
     question: '縄文時代に使われた土器として正しいものはどれ？',
     choices: ['縄文土器', '須恵器', '磁器', 'かわら'],
     answerIndex: 0,
@@ -24,6 +27,7 @@ const quizBank = [
   },
   {
     era: '縄文時代',
+    card: '縄文人',
     question: '縄文時代の住まいとして多かったものはどれ？',
     choices: ['高床倉庫', '竪穴住居', 'マンション', '城'],
     answerIndex: 1,
@@ -31,6 +35,7 @@ const quizBank = [
   },
   {
     era: '弥生時代',
+    card: '卑弥呼',
     question: '米づくりが日本で広まった時代はどれ？',
     choices: ['縄文時代', '弥生時代', '古墳時代', '江戸時代'],
     answerIndex: 1,
@@ -38,6 +43,7 @@ const quizBank = [
   },
   {
     era: '古墳時代',
+    card: '仁徳天皇',
     question: '古墳時代に大きな墓のまわりなどに置かれたものはどれ？',
     choices: ['土偶', '埴輪', '屏風', 'こま犬'],
     answerIndex: 1,
@@ -45,6 +51,7 @@ const quizBank = [
   },
   {
     era: '古墳時代',
+    card: '仁徳天皇',
     question: '大阪府にある、日本最大級の前方後円墳として有名な古墳はどれ？',
     choices: ['登呂遺跡', '仁徳天皇陵古墳', '姫路城', '東大寺'],
     answerIndex: 1,
@@ -52,6 +59,7 @@ const quizBank = [
   },
   {
     era: '飛鳥時代',
+    card: '聖徳太子',
     question: '十七条の憲法を定めた人物はだれ？',
     choices: ['聖徳太子', '源頼朝', '徳川家康', '足利義満'],
     answerIndex: 0,
@@ -59,6 +67,7 @@ const quizBank = [
   },
   {
     era: '飛鳥時代',
+    card: '中大兄皇子',
     question: '蘇我氏をたおして政治の改革を進めたできごとは何？',
     choices: ['承久の乱', '大化の改新', '刀狩', '応仁の乱'],
     answerIndex: 1,
@@ -66,6 +75,7 @@ const quizBank = [
   },
   {
     era: '奈良時代',
+    card: '聖武天皇',
     question: '大仏で有名な東大寺があるのはどこ？',
     choices: ['奈良県', '京都府', '大阪府', '兵庫県'],
     answerIndex: 0,
@@ -73,6 +83,7 @@ const quizBank = [
   },
   {
     era: '平安時代',
+    card: '紫式部',
     question: '「源氏物語」を書いた人はだれ？',
     choices: ['紫式部', '清少納言', '聖徳太子', '徳川家康'],
     answerIndex: 0,
@@ -80,6 +91,7 @@ const quizBank = [
   },
   {
     era: '鎌倉時代',
+    card: '源頼朝',
     question: '鎌倉幕府を開いた人はだれ？',
     choices: ['豊臣秀吉', '織田信長', '源頼朝', '足利尊氏'],
     answerIndex: 2,
@@ -87,6 +99,7 @@ const quizBank = [
   },
   {
     era: '南北朝時代',
+    card: '後醍醐天皇',
     question: '南北朝時代のはじまりに深く関わった天皇はだれ？',
     choices: ['後醍醐天皇', '天武天皇', '明治天皇', '桓武天皇'],
     answerIndex: 0,
@@ -94,6 +107,7 @@ const quizBank = [
   },
   {
     era: '南北朝時代',
+    card: '足利尊氏',
     question: '室町幕府を開いた人物はだれ？',
     choices: ['足利尊氏', '平清盛', '豊臣秀吉', '西郷隆盛'],
     answerIndex: 0,
@@ -101,6 +115,7 @@ const quizBank = [
   },
   {
     era: '室町時代',
+    card: '足利義満',
     question: '金閣を建てた将軍はだれ？',
     choices: ['足利義満', '足利義政', '徳川家光', '平清盛'],
     answerIndex: 0,
@@ -108,6 +123,7 @@ const quizBank = [
   },
   {
     era: '安土桃山時代',
+    card: '豊臣秀吉',
     question: '全国統一を進めた武将でないのはだれ？',
     choices: ['織田信長', '豊臣秀吉', '徳川家康', '菅原道真'],
     answerIndex: 3,
@@ -115,6 +131,7 @@ const quizBank = [
   },
   {
     era: '戦国時代',
+    card: '織田信長',
     question: '「鳴かぬなら 殺してしまえ ほととぎす」とたとえられる武将はだれ？',
     choices: ['徳川家康', '豊臣秀吉', '織田信長', '武田信玄'],
     answerIndex: 2,
@@ -122,6 +139,7 @@ const quizBank = [
   },
   {
     era: '戦国時代',
+    card: '織田信長',
     question: '長篠の戦いで鉄砲を多く使ったことで有名な武将はだれ？',
     choices: ['織田信長', '上杉謙信', '毛利元就', '伊達政宗'],
     answerIndex: 0,
@@ -129,6 +147,7 @@ const quizBank = [
   },
   {
     era: '戦国時代',
+    card: '織田信長',
     question: '「天下統一」を目前にして本能寺の変で倒れた人物はだれ？',
     choices: ['徳川家康', '織田信長', '豊臣秀頼', '足利義満'],
     answerIndex: 1,
@@ -136,6 +155,7 @@ const quizBank = [
   },
   {
     era: '戦国時代',
+    card: '豊臣秀吉',
     question: '豊臣秀吉が行った、刀や武器を取り上げる政策は何？',
     choices: ['参勤交代', '刀狩', '楽市楽座', '大化の改新'],
     answerIndex: 1,
@@ -143,6 +163,7 @@ const quizBank = [
   },
   {
     era: '戦国時代',
+    card: '徳川家康',
     question: '関ヶ原の戦いのあと、のちに江戸幕府を開いた人物はだれ？',
     choices: ['豊臣秀吉', '徳川家康', '明智光秀', '北条時宗'],
     answerIndex: 1,
@@ -150,6 +171,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '徳川家康',
     question: '江戸幕府を開いた人はだれ？',
     choices: ['徳川家康', '徳川吉宗', '西郷隆盛', '坂本龍馬'],
     answerIndex: 0,
@@ -157,6 +179,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '徳川家康',
     question: '大名が交代で江戸と領地を行き来した制度は何？',
     choices: ['刀狩', '検地', '参勤交代', '廃藩置県'],
     answerIndex: 2,
@@ -164,6 +187,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '徳川吉宗',
     question: '江戸時代の身分の中で、いちばん人数が多かったのはどれ？',
     choices: ['武士', '農民', '町人', '大名'],
     answerIndex: 1,
@@ -171,6 +195,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '徳川吉宗',
     question: '新しい政治を進めた「享保の改革」を行った将軍はだれ？',
     choices: ['徳川吉宗', '徳川家光', '徳川慶喜', '徳川家茂'],
     answerIndex: 0,
@@ -178,6 +203,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '葛飾北斎',
     question: '浮世絵で有名な「富嶽三十六景」をえがいた人はだれ？',
     choices: ['葛飾北斎', '紫式部', '福沢諭吉', '聖徳太子'],
     answerIndex: 0,
@@ -185,6 +211,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: 'ペリー',
     question: '江戸時代の終わりごろ、日本に開国を求めてきたアメリカの人物はだれ？',
     choices: ['ペリー', 'ナポレオン', 'コロンブス', 'リンカーン'],
     answerIndex: 0,
@@ -192,6 +219,7 @@ const quizBank = [
   },
   {
     era: '江戸時代',
+    card: '徳川慶喜',
     question: '江戸時代に長く続いた、外国との交流を制限する政策は何？',
     choices: ['鎖国', '徴兵令', '楽市楽座', '太閤検地'],
     answerIndex: 0,
@@ -199,6 +227,7 @@ const quizBank = [
   },
   {
     era: '明治時代',
+    card: '明治天皇',
     question: '日本で鉄道が初めて開通した区間はどこ？',
     choices: ['東京-上野', '新橋-横浜', '大阪-神戸', '京都-奈良'],
     answerIndex: 1,
@@ -206,6 +235,7 @@ const quizBank = [
   },
   {
     era: '昭和',
+    card: '昭和天皇',
     question: '昭和時代のはじめごろ、日本で大きな戦争につながっていったできごとはどれ？',
     choices: ['日清戦争', '太平洋戦争', '大化の改新', '応仁の乱'],
     answerIndex: 1,
@@ -213,6 +243,7 @@ const quizBank = [
   },
   {
     era: '昭和',
+    card: '昭和天皇',
     question: '東京オリンピックが初めて日本で開かれたのは昭和のいつごろ？',
     choices: ['昭和30年代', '昭和39年', '昭和50年', '昭和64年'],
     answerIndex: 1,
@@ -220,6 +251,7 @@ const quizBank = [
   },
   {
     era: '昭和',
+    card: '昭和のくらし',
     question: '昭和時代に広まり、くらしを大きく変えた「三種の神器」に入らないものはどれ？',
     choices: ['テレビ', '洗濯機', '冷蔵庫', '自転車'],
     answerIndex: 3,
@@ -235,7 +267,7 @@ const state = {
   currentQuestion: null,
   deck: [],
   history: [],
-  collectedEras: [],
+  collectedCards: [],
 }
 
 const app = document.querySelector('#app')
@@ -301,7 +333,7 @@ app.innerHTML = `
           </article>
           <article class="insight-card">
             <p class="eyebrow">Collection</p>
-            <h3>時代コレクション</h3>
+            <h3>人物カード</h3>
             <div id="collection-list" class="collection-list"></div>
           </article>
           <article class="insight-card">
@@ -355,11 +387,11 @@ function renderHistory() {
 }
 
 function renderCollection() {
-  const eras = [...new Set(quizBank.map((quiz) => quiz.era))]
-  collectionListEl.innerHTML = eras
-    .map((era) => {
-      const collected = state.collectedEras.includes(era) ? ' collected' : ''
-      return `<span class="collection-chip${collected}">${era}</span>`
+  const cards = [...new Set(quizBank.map((quiz) => quiz.card))]
+  collectionListEl.innerHTML = cards
+    .map((card) => {
+      const collected = state.collectedCards.includes(card) ? ' collected' : ''
+      return `<span class="collection-chip${collected}">${card}</span>`
     })
     .join('')
 }
@@ -397,12 +429,12 @@ function answerQuestion(index) {
   if (correct) {
     state.score += 20 + state.streak * 5
     state.streak += 1
-    if (!state.collectedEras.includes(state.currentQuestion.era)) {
-      state.collectedEras.push(state.currentQuestion.era)
+    if (!state.collectedCards.includes(state.currentQuestion.card)) {
+      state.collectedCards.push(state.currentQuestion.card)
     }
-    feedbackEl.textContent = `正解。${state.currentQuestion.explanation} ${state.currentQuestion.era}カードを集めました。`
+    feedbackEl.textContent = `正解。${state.currentQuestion.explanation} 「${state.currentQuestion.card}」カードを集めました。`
     learnTextEl.textContent = `${state.currentQuestion.era}: ${state.currentQuestion.explanation}`
-    addHistory(`${state.currentQuestion.era}の問題に正解して時代カードを獲得`)
+    addHistory(`${state.currentQuestion.era}の問題に正解して「${state.currentQuestion.card}」カードを獲得`)
   } else {
     state.streak = 0
     const answer = state.currentQuestion.choices[state.currentQuestion.answerIndex]
@@ -438,10 +470,10 @@ function resetGame() {
   state.streak = 0
   state.deck = shuffleArray(quizBank).slice(0, state.maxRounds)
   state.history = []
-  state.collectedEras = []
-  hintTextEl.textContent = '時代名と有名な人物・できごとをセットで覚えると、流れがつながります。'
+  state.collectedCards = []
+  hintTextEl.textContent = '時代名と人物をセットで覚えると、歴史の流れがつながります。'
   learnTextEl.textContent = '最初の問題から気楽に始めましょう。'
-  feedbackEl.textContent = '答えを選ぶと解説が見られます。正解すると時代カードが集まります。'
+  feedbackEl.textContent = '答えを選ぶと解説が見られます。正解すると人物カードが集まります。'
   nextQuestion()
   renderHud()
 }
