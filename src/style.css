@@ -170,6 +170,28 @@ h1 {
   gap: 16px;
 }
 
+.collection-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.collection-chip {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(30, 41, 59, 0.8);
+  color: #cbd5e1;
+}
+
+.collection-chip.collected {
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.26), rgba(217, 119, 6, 0.18));
+  color: #fff7ed;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
 .history-list {
   margin: 10px 0 0;
   padding-left: 18px;

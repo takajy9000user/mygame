@@ -144,6 +144,7 @@ const state = {
   currentQuestion: null,
   deck: [],
   history: [],
+  collectedEras: [],
 }
 
 const app = document.querySelector('#app')
@@ -208,6 +209,11 @@ app.innerHTML = `
             <p id="hint-text">時代名と有名な人物・できごとをセットで覚えると、流れがつながります。</p>
           </article>
           <article class="insight-card">
+            <p class="eyebrow">Collection</p>
+            <h3>時代コレクション</h3>
+            <div id="collection-list" class="collection-list"></div>
+          </article>
+          <article class="insight-card">
             <p class="eyebrow">Last Learn</p>
             <h3>今回の学び</h3>
             <p id="learn-text">最初の問題から気楽に始めましょう。</p>
@@ -232,6 +238,7 @@ const questionTextEl = document.querySelector('#question-text')
 const answerGridEl = document.querySelector('#answer-grid')
 const feedbackEl = document.querySelector('#feedback')
 const hintTextEl = document.querySelector('#hint-text')
+const collectionListEl = document.querySelector('#collection-list')
 const learnTextEl = document.querySelector('#learn-text')
 const historyListEl = document.querySelector('#history-list')
 const nextButton = document.querySelector('#next-button')
@@ -256,6 +263,16 @@ function renderHistory() {
     : '<li>まだ記録はありません。</li>'
 }
 
+function renderCollection() {
+  const eras = [...new Set(quizBank.map((quiz) => quiz.era))]
+  collectionListEl.innerHTML = eras
+    .map((era) => {
+      const collected = state.collectedEras.includes(era) ? ' collected' : ''
+      return `<span class="collection-chip${collected}">${era}</span>`
+    })
+    .join('')
+}
+
 function nextQuestion() {
   state.currentQuestion = state.deck.shift() ?? null
   if (!state.currentQuestion) return
@@ -277,6 +294,7 @@ function renderHud() {
   scoreEl.textContent = String(state.score)
   streakEl.textContent = String(state.streak)
   roundEl.textContent = `${Math.min(state.round, state.maxRounds)} / ${state.maxRounds}`
+  renderCollection()
   renderHistory()
 }
 
@@ -288,9 +306,12 @@ function answerQuestion(index) {
   if (correct) {
     state.score += 20 + state.streak * 5
     state.streak += 1
-    feedbackEl.textContent = `正解。${state.currentQuestion.explanation}`
+    if (!state.collectedEras.includes(state.currentQuestion.era)) {
+      state.collectedEras.push(state.currentQuestion.era)
+    }
+    feedbackEl.textContent = `正解。${state.currentQuestion.explanation} ${state.currentQuestion.era}カードを集めました。`
     learnTextEl.textContent = `${state.currentQuestion.era}: ${state.currentQuestion.explanation}`
-    addHistory(`${state.currentQuestion.era}の問題に正解`)
+    addHistory(`${state.currentQuestion.era}の問題に正解して時代カードを獲得`)
   } else {
     state.streak = 0
     const answer = state.currentQuestion.choices[state.currentQuestion.answerIndex]
@@ -326,9 +347,10 @@ function resetGame() {
   state.streak = 0
   state.deck = shuffleArray(quizBank).slice(0, state.maxRounds)
   state.history = []
+  state.collectedEras = []
   hintTextEl.textContent = '時代名と有名な人物・できごとをセットで覚えると、流れがつながります。'
   learnTextEl.textContent = '最初の問題から気楽に始めましょう。'
-  feedbackEl.textContent = '答えを選ぶと解説が見られます。'
+  feedbackEl.textContent = '答えを選ぶと解説が見られます。正解すると時代カードが集まります。'
   nextQuestion()
   renderHud()
 }
