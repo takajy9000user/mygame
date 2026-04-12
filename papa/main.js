@@ -18,6 +18,8 @@ class PapaScene extends Phaser.Scene {
     this.score = 0
     this.timeLeft = ROUND_TIME
     this.grabRadius = 58
+    this.pointerLeftDown = false
+    this.pointerRightDown = false
   }
 
   create() {
@@ -25,6 +27,7 @@ class PapaScene extends Phaser.Scene {
     this.createMachine()
     this.createPrizeField()
     this.createHud()
+    this.createTouchControls()
     this.createQuizOverlay()
     this.createInput()
     this.resetRound()
@@ -106,10 +109,59 @@ class PapaScene extends Phaser.Scene {
       fontSize: '18px',
       color: '#fdba74',
     }).setOrigin(1, 0)
-    this.helpText = this.add.text(24, HEIGHT - 40, '← → で移動 / Space でつかむ', {
+    this.helpText = this.add.text(24, HEIGHT - 40, '← → / 画面ボタンで移動 / Spaceか赤ボタンでつかむ', {
       fontFamily: 'Trebuchet MS, sans-serif',
       fontSize: '18px',
       color: '#e2e8f0',
+    })
+  }
+
+  createTouchControls() {
+    this.controlLayer = this.add.container(0, 0).setDepth(25)
+    this.controlLayer.setScrollFactor(0)
+
+    const createButton = (x, y, width, label, color, onPress, onRelease) => {
+      const button = this.add.container(x, y)
+      const bg = this.add.rectangle(0, 0, width, 56, color, 0.9).setStrokeStyle(2, 0xffffff, 0.18)
+      const text = this.add.text(0, 0, label, {
+        fontFamily: 'Trebuchet MS, sans-serif',
+        fontSize: '22px',
+        color: '#ffffff',
+        fontStyle: 'bold',
+      }).setOrigin(0.5)
+
+      bg.setInteractive({ useHandCursor: true })
+      bg.on('pointerdown', () => {
+        bg.setScale(0.96)
+        onPress?.()
+      })
+
+      const release = () => {
+        bg.setScale(1)
+        onRelease?.()
+      }
+
+      bg.on('pointerup', release)
+      bg.on('pointerout', release)
+      button.add([bg, text])
+      this.controlLayer.add(button)
+      return button
+    }
+
+    createButton(126, HEIGHT - 92, 92, '左', 0x1d4ed8, () => {
+      this.pointerLeftDown = true
+    }, () => {
+      this.pointerLeftDown = false
+    })
+
+    createButton(232, HEIGHT - 92, 92, '右', 0x2563eb, () => {
+      this.pointerRightDown = true
+    }, () => {
+      this.pointerRightDown = false
+    })
+
+    createButton(WIDTH - 112, HEIGHT - 92, 140, 'つかむ', 0xdc2626, () => {
+      this.runDropSequence()
     })
   }
 
@@ -187,6 +239,8 @@ class PapaScene extends Phaser.Scene {
     this.timeLeft = ROUND_TIME
     this.quizCooldown = QUIZ_INTERVAL
     this.grabRadius = 58
+    this.pointerLeftDown = false
+    this.pointerRightDown = false
     this.craneHead.x = WIDTH / 2
     this.craneHead.y = 110
     this.cable.height = 160
@@ -194,7 +248,7 @@ class PapaScene extends Phaser.Scene {
     this.rightArm.setTo(16, 182, 0, 0, 18, 24)
     this.populatePrizes()
     this.quizLayer.setVisible(false)
-    this.helpText.setText('← → で移動 / Space でつかむ')
+    this.helpText.setText('← → / 画面ボタンで移動 / Spaceか赤ボタンでつかむ')
     this.updateHud()
   }
 
@@ -365,8 +419,8 @@ class PapaScene extends Phaser.Scene {
     }
 
     if (!this.quizActive) {
-      const moveLeft = this.cursors.left.isDown || this.keys.A.isDown
-      const moveRight = this.cursors.right.isDown || this.keys.D.isDown
+      const moveLeft = this.cursors.left.isDown || this.keys.A.isDown || this.pointerLeftDown
+      const moveRight = this.cursors.right.isDown || this.keys.D.isDown || this.pointerRightDown
       const moveSpeed = 260 * (delta / 1000)
 
       if (!this.dropInProgress && moveLeft) {
