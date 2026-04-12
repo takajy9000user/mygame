@@ -5,16 +5,16 @@ const WIDTH = 960
 const HEIGHT = 540
 const PLAYER_X = 180
 const QUIZ_INTERVAL = 12000
+const BEST_SCORE_KEY = 'papa-best-score'
 
 class PapaScene extends Phaser.Scene {
   constructor() {
     super('PapaScene')
     this.quizCooldown = QUIZ_INTERVAL
-    this.quizCursor = 0
     this.gameOver = false
     this.quizActive = false
     this.survivalTime = 0
-    this.bestScore = Number(window.localStorage.getItem('papa-best-score') || 0)
+    this.bestScore = Number(window.localStorage.getItem(BEST_SCORE_KEY) || 0)
     this.flameSpeed = 280
     this.combo = 0
     this.lives = 3
@@ -236,8 +236,7 @@ class PapaScene extends Phaser.Scene {
     this.quizActive = true
     this.quizResolved = false
     this.quizCooldown = QUIZ_INTERVAL + 2000
-    this.currentQuiz = quizBank[this.quizCursor % quizBank.length]
-    this.quizCursor += 1
+    this.currentQuiz = Phaser.Utils.Array.GetRandom(quizBank)
     this.physics.pause()
     this.quizPromptText.setText(this.currentQuiz.question)
     this.quizFeedbackText.setText('正解すると炎が少しゆっくりになります。')
@@ -312,10 +311,13 @@ class PapaScene extends Phaser.Scene {
     this.spawnTimer?.remove(false)
     this.physics.pause()
     const score = Math.floor(this.survivalTime / 1000)
+    const savedBest = Number(window.localStorage.getItem(BEST_SCORE_KEY) || 0)
 
-    if (score > this.bestScore) {
+    if (score > savedBest) {
       this.bestScore = score
-      window.localStorage.setItem('papa-best-score', String(score))
+      window.localStorage.setItem(BEST_SCORE_KEY, String(score))
+    } else {
+      this.bestScore = savedBest
     }
 
     this.helpText.setText(`ゲームオーバー ${score}秒生存。Rキーで再スタート`)
@@ -366,25 +368,27 @@ class PapaScene extends Phaser.Scene {
       }
     }
 
-    this.flames.getChildren().forEach((flame) => {
-      flame.x += flame.getData('speedX') * (delta / 1000)
-      flame.y += flame.getData('speedY') * (delta / 1000)
+    if (!this.quizActive) {
+      this.flames.getChildren().forEach((flame) => {
+        flame.x += flame.getData('speedX') * (delta / 1000)
+        flame.y += flame.getData('speedY') * (delta / 1000)
 
-      if (flame.y < 70 || flame.y > HEIGHT - 80) {
-        flame.setData('speedY', flame.getData('speedY') * -1)
-      }
+        if (flame.y < 70 || flame.y > HEIGHT - 80) {
+          flame.setData('speedY', flame.getData('speedY') * -1)
+        }
 
-      if (flame.x < -40) {
-        this.flames.remove(flame, true, true)
-        return
-      }
+        if (flame.x < -40) {
+          this.flames.remove(flame, true, true)
+          return
+        }
 
-      const distance = Phaser.Math.Distance.Between(flame.x, flame.y, this.playerHitbox.x, this.playerHitbox.y)
-      if (distance < 34) {
-        this.flames.remove(flame, true, true)
-        this.takeHit()
-      }
-    })
+        const distance = Phaser.Math.Distance.Between(flame.x, flame.y, this.playerHitbox.x, this.playerHitbox.y)
+        if (distance < 34) {
+          this.flames.remove(flame, true, true)
+          this.takeHit()
+        }
+      })
+    }
 
     this.updateHud()
   }
