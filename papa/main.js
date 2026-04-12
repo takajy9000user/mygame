@@ -89,7 +89,7 @@ class PapaScene extends Phaser.Scene {
     const enemyMouth = this.add.rectangle(0, 12, 24, 8, 0xfb7185)
     this.enemy.add([enemyCore, enemyEye, enemyEye2, enemyMouth])
 
-    this.flames = this.physics.add.group()
+    this.flames = this.add.group()
     this.playerHitbox = this.add.zone(PLAYER_X, HEIGHT / 2, 42, 56)
     this.physics.add.existing(this.playerHitbox)
     this.playerHitbox.body.setAllowGravity(false)
@@ -219,7 +219,7 @@ class PapaScene extends Phaser.Scene {
       return
     }
 
-    const flame = this.physics.add.sprite(
+    const flame = this.add.image(
       this.enemy.x - 44,
       this.enemy.y + Phaser.Math.Between(-10, 10),
       'papa-flame',
@@ -227,12 +227,8 @@ class PapaScene extends Phaser.Scene {
 
     flame.setDepth(3)
     flame.setScale(1.05)
-    flame.body.setAllowGravity(false)
-    flame.body.setImmovable(true)
-    flame.body.setVelocityX(-this.flameSpeed)
-    flame.body.setVelocityY(Phaser.Math.Between(-40, 40))
-    flame.body.setSize(28, 24)
-    flame.body.setOffset(6, 4)
+    flame.setData('speedX', -this.flameSpeed)
+    flame.setData('speedY', Phaser.Math.Between(-40, 40))
     this.flames.add(flame)
   }
 
@@ -371,6 +367,13 @@ class PapaScene extends Phaser.Scene {
     }
 
     this.flames.getChildren().forEach((flame) => {
+      flame.x += flame.getData('speedX') * (delta / 1000)
+      flame.y += flame.getData('speedY') * (delta / 1000)
+
+      if (flame.y < 70 || flame.y > HEIGHT - 80) {
+        flame.setData('speedY', flame.getData('speedY') * -1)
+      }
+
       if (flame.x < -40) {
         this.flames.remove(flame, true, true)
         return
