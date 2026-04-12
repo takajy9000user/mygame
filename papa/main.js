@@ -22,11 +22,26 @@ class PapaScene extends Phaser.Scene {
 
   create() {
     this.createBackground()
+    this.createTextures()
     this.createActors()
     this.createHud()
     this.createQuizOverlay()
     this.createInput()
     this.resetRound()
+  }
+
+  createTextures() {
+    if (!this.textures.exists('papa-flame')) {
+      const graphics = this.make.graphics({ x: 0, y: 0, add: false })
+      graphics.fillStyle(0xdc2626, 1)
+      graphics.fillTriangle(4, 16, 34, 2, 34, 30)
+      graphics.fillStyle(0xfb923c, 1)
+      graphics.fillCircle(18, 16, 12)
+      graphics.fillStyle(0xfef08a, 1)
+      graphics.fillCircle(15, 14, 6)
+      graphics.generateTexture('papa-flame', 40, 32)
+      graphics.destroy()
+    }
   }
 
   createBackground() {
@@ -204,17 +219,20 @@ class PapaScene extends Phaser.Scene {
       return
     }
 
-    const flame = this.add.container(this.enemy.x - 44, this.enemy.y + Phaser.Math.Between(-10, 10))
-    const ember = this.add.circle(0, 0, 16, 0xfb923c)
-    const hotCore = this.add.circle(-4, -2, 8, 0xfef08a)
-    const tail = this.add.triangle(10, 0, 0, 0, 28, -10, 28, 10, 0xdc2626)
-    flame.add([tail, ember, hotCore])
+    const flame = this.physics.add.sprite(
+      this.enemy.x - 44,
+      this.enemy.y + Phaser.Math.Between(-10, 10),
+      'papa-flame',
+    )
 
-    this.physics.add.existing(flame)
+    flame.setDepth(3)
+    flame.setScale(1.05)
     flame.body.setAllowGravity(false)
+    flame.body.setImmovable(true)
     flame.body.setVelocityX(-this.flameSpeed)
     flame.body.setVelocityY(Phaser.Math.Between(-40, 40))
-    flame.body.setSize(28, 28)
+    flame.body.setSize(28, 24)
+    flame.body.setOffset(6, 4)
     this.flames.add(flame)
   }
 
